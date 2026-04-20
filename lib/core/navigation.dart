@@ -17,7 +17,10 @@ final goRouter = GoRouter(
     ),
     GoRoute(
       path: '/editor',
-      builder: (context, state) => const EditorScreen(),
+      builder: (context, state) {
+        final videoPath = state.extra as String?;
+        return EditorScreen(videoPath: videoPath);
+      },
     ),
   ],
 );
