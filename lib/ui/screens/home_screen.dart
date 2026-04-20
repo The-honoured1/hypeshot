@@ -81,12 +81,12 @@ class HomeScreen extends StatelessWidget {
               decoration: const BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
-              ).animate(onPlay: (controller) => controller.repeat())
+              ),
+              margin: const EdgeInsets.only(right: 8),
+            ).animate(onPlay: (controller) => controller.repeat())
                .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), duration: 800.ms, curve: Curves.easeInOut)
                .then()
                .scale(begin: const Offset(1.2, 1.2), end: const Offset(0.8, 0.8), duration: 800.ms, curve: Curves.easeInOut),
-              margin: const EdgeInsets.only(right: 8),
-            ),
             const Text(
               'RECORDING BUFFER ACTIVE',
               style: TextStyle(
