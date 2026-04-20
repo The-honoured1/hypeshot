@@ -33,17 +33,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-              _buildHeader(context),
-              const SizedBox(height: 24),
-              _buildControlPanel(isRecording),
               const SizedBox(height: 32),
+              _buildHeader(context),
+              const SizedBox(height: 32),
+              _buildControlPanel(isRecording),
+              const SizedBox(height: 40),
               _buildGameLauncher(appsAsync),
               const Spacer(),
               _buildCaptureCentral(context, isRecording),
               const Spacer(),
               _buildRecentSection(context),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -54,22 +54,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'HYPESHOT',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 16,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 2,
-                foreground: Paint()
-                  ..shader = const LinearGradient(
-                    colors: [AppTheme.primaryNeon, AppTheme.secondaryNeon],
-                  ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                letterSpacing: 4,
+                color: Colors.white,
               ),
             ),
+            const SizedBox(height: 12),
             const HypeMeter(level: 0.72),
           ],
         ),
@@ -78,13 +77,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Hero(
             tag: 'profile_avatar',
             child: Container(
-              padding: const EdgeInsets.all(2),
+              padding: const EdgeInsets.all(1.5),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.secondaryNeon.withOpacity(0.5), width: 2),
+                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
               ),
               child: const CircleAvatar(
-                radius: 20,
+                radius: 18,
                 backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
               ),
             ),
@@ -102,15 +101,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (isRecording) const RecordingWave() else const Icon(LucideIcons.radio, size: 16, color: Colors.white24),
+              if (isRecording) const RecordingWave() else Icon(LucideIcons.circle, size: 12, color: Colors.white.withOpacity(0.2)),
               const SizedBox(width: 12),
               Text(
-                isRecording ? 'RECORDING LIVE' : 'STANDBY',
+                isRecording ? 'RECORDING' : 'STANDBY',
                 style: TextStyle(
-                  color: isRecording ? AppTheme.accentRed : Colors.white24,
+                  color: isRecording ? Colors.white : Colors.white24,
                   fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
                 ),
               ),
             ],
@@ -119,16 +118,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: GlassCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('AUTO-REC', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white54)),
-                Switch(
-                  value: _autoRecord,
-                  onChanged: (v) => setState(() => _autoRecord = v),
-                  activeColor: AppTheme.secondaryNeon,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                const Text('AUTO-CAPTURE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white54)),
+                Transform.scale(
+                  scale: 0.7,
+                  child: Switch(
+                    value: _autoRecord,
+                    onChanged: (v) => setState(() => _autoRecord = v),
+                    activeColor: Colors.white,
+                    activeTrackColor: Colors.white.withOpacity(0.2),
+                  ),
                 ),
               ],
             ),
@@ -143,12 +145,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'GAME LAUNCHER',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white54),
+          'LAST PLAYED',
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white38),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         SizedBox(
-          height: 90,
+          height: 80,
           child: appsAsync.when(
             data: (apps) => ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -156,36 +158,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               itemBuilder: (context, index) {
                 final app = apps[index];
                 return Padding(
-                  padding: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.only(right: 20),
                   child: GestureDetector(
                     onTap: () => _launchGameWithRecord(app.packageName),
                     child: Column(
                       children: [
                         Container(
-                          width: 60,
-                          height: 60,
+                          width: 54,
+                          height: 54,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(color: AppTheme.secondaryNeon.withOpacity(0.2), blurRadius: 10),
-                            ],
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.white.withOpacity(0.05)),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(14),
                             child: app is ApplicationWithIcon 
-                                ? Image.memory((app as ApplicationWithIcon).icon, fit: BoxFit.cover)
-                                : const Icon(LucideIcons.gamepad2),
+                                ? Image.memory((app as ApplicationWithIcon).icon, fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(0.8))
+                                : const Icon(LucideIcons.layoutGrid, size: 20),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
                         SizedBox(
-                          width: 60,
+                          width: 54,
                           child: Text(
-                            app.appName.toUpperCase(),
+                            app.appName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900),
+                            style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w500, color: Colors.white54),
                           ),
                         ),
                       ],
@@ -194,8 +194,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               },
             ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, s) => const Text('Error loading games'),
+            loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            error: (e, s) => const Text('Error loading apps'),
           ),
         ),
       ],
@@ -216,22 +216,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Stack(
             alignment: Alignment.center,
             children: [
-              Animate(
-                onPlay: (c) => c.repeat(reverse: true),
-                child: Container(
-                  width: 220,
-                  height: 220,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: (isRecording ? AppTheme.accentRed : AppTheme.primaryNeon).withOpacity(0.1),
-                  ),
+              Container(
+                width: 240,
+                height: 240,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white.withOpacity(0.03), width: 2),
                 ),
-              ).scale(begin: const Offset(0.9, 0.9), end: const Offset(1.1, 1.1), duration: 2.seconds),
-              
+              ),
               HypeButton(
-                label: isRecording ? 'Stop Recording' : 'Capture Highlight',
-                icon: isRecording ? LucideIcons.stopCircle : LucideIcons.camera,
-                isPrimary: !isRecording,
+                label: isRecording ? 'Finish Recording' : 'Capture Moment',
+                icon: isRecording ? LucideIcons.check : LucideIcons.camera,
+                isPrimary: true,
                 onTap: () async {
                   if (isRecording) {
                     final path = await ref.read(recordingProvider.notifier).stop();
@@ -239,17 +235,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       context.push('/editor', extra: path);
                     }
                   } else {
-                    context.push('/editor'); // Direct edit for retrospective trigger
+                    context.push('/editor');
                   }
                 },
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            isRecording ? 'RECORDING SESSION ACTIVE' : 'READY TO CLIP',
-            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white38, letterSpacing: 2),
-          ),
+          const SizedBox(height: 24),
+          const Text(
+            'TAP TO RECORD HIGHLIGHT',
+            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: Colors.white24, letterSpacing: 1),
+          ).animate().fadeIn(delay: 500.ms),
         ],
       ),
     );
@@ -259,13 +255,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 16),
-          child: Text(
-            'RECENT HIGHLIGHTS',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white54),
-          ),
+        const Text(
+          'MOMENTS',
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white38),
         ),
+        const SizedBox(height: 20),
         SizedBox(
           height: 120,
           child: ListView.builder(
@@ -279,23 +273,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: GlassCard(
                     padding: EdgeInsets.zero,
                     child: Container(
-                      width: 110,
+                      width: 140,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        image: const DecorationImage(
-                          image: NetworkImage('https://picsum.photos/300/400'),
+                        borderRadius: BorderRadius.circular(20),
+                        image: DecorationImage(
+                          image: NetworkImage('https://picsum.photos/seed/${index + 10}/400/300'),
                           fit: BoxFit.cover,
-                          opacity: 0.4,
+                          opacity: 0.3,
                         ),
                       ),
-                      child: const Center(child: Icon(LucideIcons.playCircle, color: Colors.white, size: 28)),
+                      child: const Center(child: Icon(LucideIcons.play, color: Colors.white54, size: 24)),
                     ),
                   ),
                 ),
               );
             },
           ),
-        ),
+        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
       ],
     );
   }

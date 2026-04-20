@@ -15,41 +15,33 @@ class HypeMeter extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'HYPE LEVEL',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+              'CAPTURE FOCUS',
+              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1),
             ),
             Text(
               '${(level * 100).toInt()}%',
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppTheme.secondaryNeon),
+              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppTheme.accent),
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Stack(
           children: [
             Container(
-              height: 4,
+              height: 2,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(2),
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(1),
               ),
             ),
             AnimatedContainer(
               duration: 1.seconds,
-              height: 4,
+              height: 2,
               width: MediaQuery.of(context).size.width * level * 0.8,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(2),
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primaryNeon, AppTheme.secondaryNeon],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.secondaryNeon.withOpacity(0.5),
-                    blurRadius: 10,
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(1),
+                color: Colors.white.withOpacity(0.8),
               ),
             ),
           ],
@@ -65,22 +57,22 @@ class RecordingWave extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 20,
-      width: 40,
+      height: 16,
+      width: 32,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(5, (index) {
+        children: List.generate(4, (index) {
           return Container(
-            width: 3,
+            width: 2,
             decoration: BoxDecoration(
-              color: AppTheme.secondaryNeon,
-              borderRadius: BorderRadius.circular(2),
+              color: Colors.white.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(1),
             ),
           ).animate(onPlay: (c) => c.repeat(reverse: true))
            .scaleY(
-             begin: 0.3, 
+             begin: 0.4, 
              end: 1.0, 
-             duration: Duration(milliseconds: 300 + (index * 100)),
+             duration: Duration(milliseconds: 500 + (index * 150)),
              curve: Curves.easeInOut,
            );
         }),

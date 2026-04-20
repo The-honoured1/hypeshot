@@ -14,16 +14,16 @@ class MeshBackground extends StatelessWidget {
             gradient: AppTheme.meshGradient(),
           ),
         ),
-        // Subtle animated glow spots
+        // Very subtle ambient light
         Positioned(
-          top: -100,
-          right: -100,
-          child: _GlowSpot(color: AppTheme.primaryNeon.withOpacity(0.15), size: 400),
+          top: -200,
+          right: -200,
+          child: _GlowSpot(color: Colors.white.withOpacity(0.03), size: 600),
         ),
         Positioned(
-          bottom: -150,
-          left: -150,
-          child: _GlowSpot(color: AppTheme.secondaryNeon.withOpacity(0.1), size: 500),
+          bottom: -100,
+          left: -100,
+          child: _GlowSpot(color: AppTheme.accent.withOpacity(0.05), size: 500),
         ),
         child,
       ],

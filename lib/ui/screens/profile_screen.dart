@@ -13,9 +13,9 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('PROFILE', style: TextStyle(letterSpacing: 4, fontWeight: FontWeight.w900, fontSize: 16)),
+        title: const Text('MOMENTS', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700, fontSize: 13)),
         leading: IconButton(
-          icon: const Icon(LucideIcons.chevronLeft),
+          icon: const Icon(LucideIcons.chevronLeft, size: 20),
           onPressed: () => context.pop(),
         ),
       ),
@@ -24,13 +24,13 @@ class ProfileScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              _buildAvatarSection(context),
               const SizedBox(height: 32),
-              _buildStatsGrid(context),
-              const SizedBox(height: 40),
+              _buildAvatarSection(context),
+              const SizedBox(height: 48),
+              _buildStatsRow(context),
+              const SizedBox(height: 56),
               _buildClipsHeader(context),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               _buildClipsGrid(context),
               const SizedBox(height: 40),
             ],
@@ -46,66 +46,67 @@ class ProfileScreen extends StatelessWidget {
         Hero(
           tag: 'profile_avatar',
           child: Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(1),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.primaryNeon, width: 2),
+              border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
             ),
             child: const CircleAvatar(
-              radius: 60,
+              radius: 56,
               backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         const Text(
-          'PRO_GAMER_99',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 1),
-        ).animate().fadeIn().scale(),
+          'ProGamer99',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+        ).animate().fadeIn().moveY(begin: 10, end: 0),
+        const SizedBox(height: 4),
         const Text(
-          'LEGENDARY CLIPPER',
-          style: TextStyle(color: AppTheme.secondaryNeon, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 2),
+          'Moment Collector',
+          style: TextStyle(color: Colors.white38, fontWeight: FontWeight.w500, fontSize: 13, letterSpacing: 0.5),
         ).animate().fadeIn(delay: 200.ms),
       ],
     );
   }
 
-  Widget _buildStatsGrid(BuildContext context) {
+  Widget _buildStatsRow(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Expanded(child: _statCard('42', 'CLIPS', LucideIcons.video, AppTheme.primaryNeon)),
-        const SizedBox(width: 16),
-        Expanded(child: _statCard('1.2k', 'SHARES', LucideIcons.share2, AppTheme.secondaryNeon)),
-        const SizedBox(width: 16),
-        Expanded(child: _statCard('15', 'WINS', LucideIcons.trophy, AppTheme.statGlow)),
+        _statColumn('42', 'CLIPS'),
+        _statDivider(),
+        _statColumn('1.2k', 'SHARES'),
+        _statDivider(),
+        _statColumn('15', 'WINS'),
       ],
-    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0);
+    ).animate().fadeIn(delay: 400.ms);
   }
 
-  Widget _statCard(String value, String label, IconData icon, Color color) {
-    return GlassCard(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      glowColor: color,
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-          Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white38)),
-        ],
-      ),
+  Widget _statColumn(String value, String label) {
+    return Column(
+      children: [
+        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.white30, letterSpacing: 1)),
+      ],
     );
   }
 
+  Widget _statDivider() {
+    return Container(width: 1, height: 20, color: Colors.white.withOpacity(0.05));
+  }
+
   Widget _buildClipsHeader(BuildContext context) {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'SAVED HIGHLIGHTS',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white54),
+        const Text(
+          'COLLECTION',
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white38),
         ),
-        Icon(LucideIcons.filter, size: 16, color: Colors.white38),
+        Icon(LucideIcons.list, size: 14, color: Colors.white12),
       ],
     );
   }
@@ -116,31 +117,43 @@ class ProfileScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.8,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        childAspectRatio: 0.85,
       ),
       itemCount: 6,
       itemBuilder: (context, index) {
         return Hero(
-          tag: 'clip_$index',
+          tag: 'home_clip_$index',
           child: GlassCard(
             padding: EdgeInsets.zero,
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 image: DecorationImage(
-                  image: NetworkImage('https://picsum.photos/seed/${index + 50}/300/400'),
+                  image: NetworkImage('https://picsum.photos/seed/${index + 50}/400/500'),
                   fit: BoxFit.cover,
-                  opacity: 0.6,
+                  opacity: 0.4,
                 ),
               ),
-              child: const Center(
-                child: Icon(LucideIcons.playCircle, color: Colors.white, size: 40),
+              child: Stack(
+                children: [
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
+                    child: Text(
+                      '30s',
+                      style: TextStyle(fontSize: 9, color: Colors.white30, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const Center(
+                    child: Icon(LucideIcons.play, color: Colors.white24, size: 28),
+                  ),
+                ],
               ),
             ),
           ),
-        ).animate().fadeIn(delay: Duration(milliseconds: 100 * index)).slideY(begin: 0.1, end: 0);
+        ).animate().fadeIn(delay: Duration(milliseconds: 100 * index)).moveY(begin: 20, end: 0);
       },
     );
   }

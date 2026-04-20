@@ -1,11 +1,8 @@
-import 'dart:io';
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
 
 class RecordingService {
   static bool _isRecording = false;
-  static String? _currentRecordingPath;
 
   static bool get isRecording => _isRecording;
 
@@ -14,23 +11,24 @@ class RecordingService {
 
     // Check permissions
     final micStatus = await Permission.microphone.request();
-    final storageStatus = await Permission.storage.request();
-    final mediaStatus = await Permission.videos.request();
+    final notificationsStatus = await Permission.notification.request();
 
-    if (micStatus.isGranted) {
-      final Directory? extDir = await getExternalStorageDirectory();
+    if (micStatus.isGranted || micStatus.isLimited) {
       final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       final String fileName = "HypeShot_$timestamp";
 
       try {
-        final path = await FlutterScreenRecording.startRecordScreenAndAudio(fileName);
-        if (path.isNotEmpty) {
+        final success = await FlutterScreenRecording.startRecordScreenAndAudio(
+          fileName,
+          titleNotification: "HypeShot Recording",
+          messageNotification: "Capture in progress...",
+        );
+        
+        if (success) {
           _isRecording = true;
-          _currentRecordingPath = path;
           return true;
         }
       } catch (e) {
-        // Handle error
         return false;
       }
     }
@@ -43,7 +41,7 @@ class RecordingService {
     try {
       final path = await FlutterScreenRecording.stopRecordScreen;
       _isRecording = false;
-      return path;
+      return path; // stopRecordScreen usually returns the path
     } catch (e) {
       _isRecording = false;
       return null;

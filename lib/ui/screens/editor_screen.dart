@@ -46,8 +46,8 @@ class _EditorScreenState extends State<EditorScreen> {
       setState(() => _isProcessing = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('CLIP SAVED TO GALLERY! 🔥', style: TextStyle(fontWeight: FontWeight.bold)),
-          backgroundColor: AppTheme.primaryNeon,
+          content: Text('Saved to Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
+          backgroundColor: AppTheme.surface,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -60,14 +60,14 @@ class _EditorScreenState extends State<EditorScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('EDIT HIGHLIGHT', style: TextStyle(letterSpacing: 2, fontSize: 16, fontWeight: FontWeight.w900)),
-        leading: IconButton(icon: const Icon(LucideIcons.x), onPressed: () => context.pop()),
+        title: const Text('EDIT MOMENT', style: TextStyle(letterSpacing: 1, fontSize: 13, fontWeight: FontWeight.w700)),
+        leading: IconButton(icon: const Icon(LucideIcons.x, size: 20), onPressed: () => context.pop()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton(
               onPressed: _isProcessing ? null : _exportVideo,
-              child: const Text('EXPORT', style: TextStyle(color: AppTheme.secondaryNeon, fontWeight: FontWeight.w900)),
+              child: const Text('SAVE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
             ),
           ),
         ],
@@ -79,15 +79,12 @@ class _EditorScreenState extends State<EditorScreen> {
                   children: [
                     Expanded(
                       child: Container(
-                        margin: const EdgeInsets.all(20),
+                        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 30),
-                          ],
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(20),
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
@@ -95,85 +92,82 @@ class _EditorScreenState extends State<EditorScreen> {
                               if (_overlayText.isNotEmpty)
                                 Center(
                                   child: Text(
-                                    _overlayText.toUpperCase(),
+                                    _overlayText,
                                     style: const TextStyle(
-                                      fontSize: 56,
-                                      fontWeight: FontWeight.w900,
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.w700,
                                       color: Colors.white,
-                                      letterSpacing: -2,
-                                      shadows: [
-                                        Shadow(blurRadius: 20, color: AppTheme.primaryNeon, offset: Offset(0, 0)),
-                                      ],
+                                      letterSpacing: -1,
                                     ),
-                                  ).animate().scale(begin: const Offset(0.5, 0.5), end: const Offset(1, 1), curve: Curves.elasticOut, duration: 800.ms),
+                                  ).animate().fadeIn(duration: 400.ms),
                                 ),
-                              _buildPlayButton(),
+                              _buildPlayPause(),
                             ],
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 120), // Space for floating dock
+                    const SizedBox(height: 140),
                   ],
                 ),
-                _buildFloatingDock(),
-                if (_isProcessing) _buildProcessingOverlay(),
+                _buildMinimalDock(),
+                if (_isProcessing) _buildCalmOverlay(),
               ],
             )
-          : const Center(child: CircularProgressIndicator(color: AppTheme.primaryNeon)),
+          : const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 
-  Widget _buildPlayButton() {
+  Widget _buildPlayPause() {
     return AnimatedOpacity(
       opacity: _controller.isPlaying ? 0 : 1,
       duration: const Duration(milliseconds: 200),
       child: GestureDetector(
         onTap: () => _controller.video.play(),
         child: Container(
-          width: 80,
-          height: 80,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
-            color: Colors.black38,
+            color: Colors.black26,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white24),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
           ),
-          child: const Icon(LucideIcons.play, size: 40, color: Colors.white),
+          child: const Icon(LucideIcons.play, size: 24, color: Colors.white),
         ),
       ),
     );
   }
 
-  Widget _buildFloatingDock() {
+  Widget _buildMinimalDock() {
     return Positioned(
-      bottom: 30,
-      left: 20,
-      right: 20,
+      bottom: 24,
+      left: 24,
+      right: 24,
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 50,
+              height: 40,
               child: TrimSlider(
                 controller: _controller,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _toolIcon(LucideIcons.timer, 'SLOW-MO', _isSlowMo, () => setState(() => _isSlowMo = !_isSlowMo)),
-                _toolIcon(LucideIcons.type, 'TEXT', _overlayText.isNotEmpty, _showTextInput),
-                _toolIcon(LucideIcons.maximize, 'ZOOM', false, () {}),
-                _toolIcon(LucideIcons.music, 'SFX', false, () {}),
+                _toolIcon(LucideIcons.timer, 'Slow', _isSlowMo, () => setState(() => _isSlowMo = !_isSlowMo)),
+                _toolIcon(LucideIcons.type, 'Text', _overlayText.isNotEmpty, _showTextInput),
+                _toolIcon(LucideIcons.maximize, 'Crop', false, () {}),
+                _toolIcon(LucideIcons.volume2, 'Audio', false, () {}),
               ],
             ),
           ],
         ),
       ),
-    ).animate().slideY(begin: 1, end: 0, duration: 600.ms, curve: Curves.easeOutCubic);
+    ).animate().fadeIn();
   }
 
   Widget _toolIcon(IconData icon, String label, bool active, VoidCallback onTap) {
@@ -181,15 +175,15 @@ class _EditorScreenState extends State<EditorScreen> {
       onTap: onTap,
       child: Column(
         children: [
-          Icon(icon, color: active ? AppTheme.primaryNeon : Colors.white54, size: 22),
-          const SizedBox(height: 6),
+          Icon(icon, color: active ? Colors.white : Colors.white24, size: 20),
+          const SizedBox(height: 8),
           Text(
             label,
             style: TextStyle(
               fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: active ? AppTheme.primaryNeon : Colors.white38,
-              letterSpacing: 1,
+              fontWeight: FontWeight.w600,
+              color: active ? Colors.white : Colors.white24,
+              letterSpacing: 0.5,
             ),
           ),
         ],
@@ -197,25 +191,24 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
-  Widget _buildProcessingOverlay() {
+  Widget _buildCalmOverlay() {
     return Container(
-      color: Colors.black87,
+      color: AppTheme.background.withOpacity(0.9),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(color: AppTheme.secondaryNeon, strokeWidth: 6),
-            const SizedBox(height: 24),
-            Text(
-              'RENDERING HYPE...',
+            const CircularProgressIndicator(strokeWidth: 2, color: Colors.white24),
+            const SizedBox(height: 32),
+            const Text(
+              'Saving Clip...',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
-                color: AppTheme.secondaryNeon,
-                shadows: [Shadow(color: AppTheme.secondaryNeon.withOpacity(0.5), blurRadius: 10)],
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.white54,
+                letterSpacing: 0.5,
               ),
-            ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
+            ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 3.seconds),
           ],
         ),
       ),
@@ -236,42 +229,32 @@ class _EditorScreenState extends State<EditorScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  autofocus: true,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(hintText: 'SUMMON YOUR HYPE...', border: InputBorder.none),
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
-                  onChanged: (v) => current = v,
-                ),
-                const SizedBox(height: 24),
-                Wrap(
-                  spacing: 12,
-                  children: ['CLUTCH', 'WTF', 'GG', 'EZ', 'SAVAGE'].map((t) => _presetChip(t)).toList(),
-                ),
+                const SizedBox(height: 4),
+                Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(2))),
                 const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: TextField(
+                    autofocus: true,
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(hintText: 'Add Caption...', border: InputBorder.none, hintStyle: TextStyle(color: Colors.white12)),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                    onChanged: (v) => current = v,
+                  ),
+                ),
+                const SizedBox(height: 48),
                 HypeButton(
-                  label: 'ADD OVERLAY',
+                  label: 'Add to Moment',
                   onTap: () {
                     setState(() => _overlayText = current);
                     Navigator.pop(context);
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 32),
               ],
             ),
           ),
         );
-      },
-    );
-  }
-
-  Widget _presetChip(String t) {
-    return ActionChip(
-      label: Text(t, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10)),
-      backgroundColor: Colors.white10,
-      onPressed: () {
-        setState(() => _overlayText = t);
-        Navigator.pop(context);
       },
     );
   }

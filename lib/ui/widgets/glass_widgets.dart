@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 
 class HypeButton extends StatelessWidget {
@@ -18,45 +17,51 @@ class HypeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isPrimary ? AppTheme.primaryNeon : AppTheme.secondaryNeon;
-
+    // Modern Calm style: Soft solid fills or ghost borders
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: [color, color.withOpacity(0.7)],
-          ),
-          boxShadow: [
+          color: isPrimary ? Colors.white : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12), // Slightly less rounded for a tech-clean look
+          border: isPrimary 
+              ? null 
+              : Border.all(color: Colors.white.withOpacity(0.1)),
+          boxShadow: isPrimary ? [
             BoxShadow(
-              color: color.withOpacity(0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ] : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[
-              Icon(icon, color: Colors.white, size: 20),
-              const SizedBox(width: 12),
+              Icon(
+                icon, 
+                color: isPrimary ? AppTheme.background : Colors.white, 
+                size: 18,
+              ),
+              const SizedBox(width: 10),
             ],
             Text(
-              label.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.5,
+              label,
+              style: TextStyle(
+                color: isPrimary ? AppTheme.background : Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                letterSpacing: 0.2,
               ),
             ),
           ],
         ),
       ),
-    ).animate(onPlay: (c) => c.repeat(reverse: true))
-     .scale(begin: const Offset(1, 1), end: const Offset(1.02, 1.02), duration: 2.seconds);
+    );
   }
 }
 
@@ -64,12 +69,14 @@ class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
   final Color? glowColor;
+  final BorderRadius? radius;
 
   const GlassCard({
     super.key,
     required this.child,
     this.padding,
     this.glowColor,
+    this.radius,
   });
 
   @override
@@ -78,11 +85,11 @@ class GlassCard extends StatelessWidget {
       child: Container(
         padding: padding ?? const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16),
+          color: Colors.white.withOpacity(0.03),
+          borderRadius: radius ?? BorderRadius.circular(20),
           border: Border.all(
-            color: (glowColor ?? Colors.white).withOpacity(0.1),
-            width: 1,
+            color: Colors.white.withOpacity(0.05),
+            width: 0.5,
           ),
         ),
         child: child,
