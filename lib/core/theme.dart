@@ -1,86 +1,74 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color background = Color(0xFF0A0A0B);
-  static const Color surface = Color(0xFF161618);
-  static const Color primaryNeon = Color(0xFFD01CFF); // Electric Purple
-  static const Color secondaryNeon = Color(0xFF00F0FF); // Cyber Cyan
-  static const Color accentRed = Color(0xFFFF2D55); // Gamer Red
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xFF949494);
+  static const Color background = Color(0xFF070708);
+  static const Color surface = Color(0xFF121214);
+  static const Color primaryNeon = Color(0xFFD01CFF); 
+  static const Color secondaryNeon = Color(0xFF00F0FF); 
+  static const Color accentRed = Color(0xFFFF2D55);
+  static const Color statGlow = Color(0xFF3BFFB1);
 
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: Colors.transparent, // Allow for mesh background
       colorScheme: const ColorScheme.dark(
         primary: primaryNeon,
         secondary: secondaryNeon,
         surface: surface,
-        background: background,
         error: accentRed,
       ),
       textTheme: GoogleFonts.outfitTextTheme(
         const TextTheme(
-          displayLarge: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            color: textPrimary,
-            letterSpacing: -0.5,
-          ),
-          displayMedium: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: textPrimary,
-          ),
-          bodyLarge: TextStyle(
-            fontSize: 16,
-            color: textPrimary,
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            color: textSecondary,
-          ),
-        ),
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: textPrimary,
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryNeon,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
+          displayLarge: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, letterSpacing: -1),
+          displayMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+          titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1),
+          bodyLarge: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w500),
+          bodyMedium: TextStyle(fontSize: 14, color: Colors.white70),
         ),
       ),
     );
   }
 
-  static BoxDecoration neonGlow(Color color) {
+  static BoxDecoration glass({
+    double blur = 10,
+    double opacity = 0.1,
+    BorderRadius? radius,
+    Color? color,
+  }) {
     return BoxDecoration(
-      boxShadow: [
-        BoxShadow(
-          color: color.withOpacity(0.3),
-          blurRadius: 20,
-          spreadRadius: 2,
-        ),
+      color: (color ?? Colors.white).withOpacity(opacity),
+      borderRadius: radius ?? BorderRadius.circular(16),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.1),
+        width: 1,
+      ),
+    );
+  }
+
+  static LinearGradient meshGradient() {
+    return const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF0F0F12),
+        Color(0xFF070708),
+        Color(0xFF0A0214),
       ],
+      stops: [0.0, 0.5, 1.0],
+    );
+  }
+
+  static Widget glassOverlay({required Widget child, double blur = 12}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: child,
+      ),
     );
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
+import '../widgets/glass_widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -8,149 +11,137 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('PROFILE'),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.settings),
-            onPressed: () {},
-          ),
-        ],
+        title: const Text('PROFILE', style: TextStyle(letterSpacing: 4, fontWeight: FontWeight.w900, fontSize: 16)),
+        leading: IconButton(
+          icon: const Icon(LucideIcons.chevronLeft),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            _buildProfileHeader(context),
-            const SizedBox(height: 30),
-            _buildStats(context),
-            const SizedBox(height: 30),
-            _buildClipsGrid(context),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              _buildAvatarSection(context),
+              const SizedBox(height: 32),
+              _buildStatsGrid(context),
+              const SizedBox(height: 40),
+              _buildClipsHeader(context),
+              const SizedBox(height: 20),
+              _buildClipsGrid(context),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context) {
+  Widget _buildAvatarSection(BuildContext context) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.primaryNeon, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryNeon.withOpacity(0.3),
-                blurRadius: 15,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: const CircleAvatar(
-            radius: 50,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
+        Hero(
+          tag: 'profile_avatar',
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.primaryNeon, width: 2),
+            ),
+            child: const CircleAvatar(
+              radius: 60,
+              backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
+            ),
           ),
         ),
         const SizedBox(height: 16),
         const Text(
           'PRO_GAMER_99',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-          ),
-        ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 1),
+        ).animate().fadeIn().scale(),
         const Text(
-          'Legendary Clipper',
-          style: TextStyle(
-            color: AppTheme.secondaryNeon,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
+          'LEGENDARY CLIPPER',
+          style: TextStyle(color: AppTheme.secondaryNeon, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 2),
+        ).animate().fadeIn(delay: 200.ms),
       ],
     );
   }
 
-  Widget _buildStats(BuildContext context) {
+  Widget _buildStatsGrid(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _statItem('42', 'CLIPS'),
-        _statItem('1.2k', 'SHARES'),
-        _statItem('15', 'WINS'),
+        Expanded(child: _statCard('42', 'CLIPS', LucideIcons.video, AppTheme.primaryNeon)),
+        const SizedBox(width: 16),
+        Expanded(child: _statCard('1.2k', 'SHARES', LucideIcons.share2, AppTheme.secondaryNeon)),
+        const SizedBox(width: 16),
+        Expanded(child: _statCard('15', 'WINS', LucideIcons.trophy, AppTheme.statGlow)),
       ],
+    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0);
+  }
+
+  Widget _statCard(String value, String label, IconData icon, Color color) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      glowColor: color,
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 8),
+          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+          Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white38)),
+        ],
+      ),
     );
   }
 
-  Widget _statItem(String value, String label) {
-    return Column(
+  Widget _buildClipsHeader(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-          ),
+          'SAVED HIGHLIGHTS',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white54),
         ),
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppTheme.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1,
-          ),
-        ),
+        Icon(LucideIcons.filter, size: 16, color: Colors.white38),
       ],
     );
   }
 
   Widget _buildClipsGrid(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'SAVED CLIPS',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1,
-            ),
-            itemCount: 12,
-            itemBuilder: (context, index) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://picsum.photos/300'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: const Center(
-                  child: Icon(LucideIcons.play, color: Colors.white, size: 20),
-                ),
-              );
-            },
-          ),
-        ],
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.8,
       ),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Hero(
+          tag: 'clip_$index',
+          child: GlassCard(
+            padding: EdgeInsets.zero,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: DecorationImage(
+                  image: NetworkImage('https://picsum.photos/seed/${index + 50}/300/400'),
+                  fit: BoxFit.cover,
+                  opacity: 0.6,
+                ),
+              ),
+              child: const Center(
+                child: Icon(LucideIcons.playCircle, color: Colors.white, size: 40),
+              ),
+            ),
+          ),
+        ).animate().fadeIn(delay: Duration(milliseconds: 100 * index)).slideY(begin: 0.1, end: 0);
+      },
     );
   }
 }

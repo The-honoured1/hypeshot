@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme.dart';
+import '../widgets/glass_widgets.dart';
+import '../widgets/recording_widgets.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,6 +12,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -19,11 +22,11 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _buildHeader(context),
               const SizedBox(height: 40),
-              _buildWelcomeText(context),
+              _buildWelcomeSection(context),
               const Spacer(),
-              _buildCaptureButton(context),
+              _buildCaptureCentral(context),
               const Spacer(),
-              _buildRecentClips(context),
+              _buildRecentSection(context),
               const SizedBox(height: 20),
             ],
           ),
@@ -36,27 +39,38 @@ class HomeScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'HYPESHOT',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 2,
-            color: AppTheme.primaryNeon,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'HYPESHOT',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+                foreground: Paint()
+                  ..shader = const LinearGradient(
+                    colors: [AppTheme.primaryNeon, AppTheme.secondaryNeon],
+                  ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+              ),
+            ),
+            const HypeMeter(level: 0.65),
+          ],
         ),
         GestureDetector(
           onTap: () => context.push('/profile'),
-          child: Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.secondaryNeon, width: 2),
-            ),
-            child: const CircleAvatar(
-              radius: 20,
-              backgroundColor: AppTheme.surface,
-              child: Icon(LucideIcons.user, color: Colors.white, size: 20),
+          child: Hero(
+            tag: 'profile_avatar',
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.secondaryNeon.withOpacity(0.5), width: 2),
+              ),
+              child: const CircleAvatar(
+                radius: 20,
+                backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
+              ),
             ),
           ),
         ),
@@ -64,157 +78,144 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeText(BuildContext context) {
+  Widget _buildWelcomeSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'READY TO CLIP?',
           style: Theme.of(context).textTheme.displayLarge,
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
+        ).animate().fadeIn(duration: 600.ms).slideX(begin: -0.2, end: 0),
+        const SizedBox(height: 12),
+        GlassCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const RecordingWave(),
+              const SizedBox(width: 12),
+              const Text(
+                'BUFFER ACTIVE',
+                style: TextStyle(
+                  color: AppTheme.secondaryNeon,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                ),
               ),
-              margin: const EdgeInsets.only(right: 8),
-            ).animate(onPlay: (controller) => controller.repeat())
-               .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), duration: 800.ms, curve: Curves.easeInOut)
-               .then()
-               .scale(begin: const Offset(1.2, 1.2), end: const Offset(0.8, 0.8), duration: 800.ms, curve: Curves.easeInOut),
-            const Text(
-              'RECORDING BUFFER ACTIVE',
-              style: TextStyle(
-                color: Colors.green,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ).animate().fadeIn(delay: 200.ms).scale(begin: const Offset(0.8, 0.8)),
       ],
     );
   }
 
-  Widget _buildCaptureButton(BuildContext context) {
+  Widget _buildCaptureCentral(BuildContext context) {
     return Center(
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          GestureDetector(
-            onTap: () {
-              // Simulate capture and navigate to editor
-              context.push('/editor');
-            },
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const RadialGradient(
-                  colors: [AppTheme.primaryNeon, Colors.transparent],
-                  stops: [0.7, 1.0],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryNeon.withOpacity(0.4),
-                    blurRadius: 40,
-                    spreadRadius: 5,
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      LucideIcons.camera,
-                      color: Colors.black,
-                      size: 50,
-                    ),
-                  ),
-                ),
-              ),
-            ).animate(onPlay: (controller) => controller.repeat())
-             .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 1.seconds, curve: Curves.easeInOut)
-             .then()
-             .scale(begin: const Offset(1.1, 1.1), end: const Offset(1, 1), duration: 1.seconds, curve: Curves.easeInOut),
-          ),
-          const SizedBox(height: 30),
-          const Text(
-            'CAPTURE LAST 30s',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2,
+          // Outer Glow
+          Container(
+            width: 240,
+            height: 240,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.primaryNeon.withOpacity(0.1),
             ),
-          ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
+          ).animate(onPlay: (c) => c.repeat(reverse: true))
+           .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), duration: 2.seconds),
+          
+          Column(
+            children: [
+              HypeButton(
+                label: 'Capture last 30s',
+                icon: LucideIcons.camera,
+                onTap: () => context.push('/editor'),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'TAP TO SAVE MOMENT',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white38,
+                  letterSpacing: 2,
+                ),
+              ).animate().fadeIn(delay: 1.seconds),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildRecentClips(BuildContext context) {
+  Widget _buildRecentSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'RECENT CLIPS',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.5,
-            color: AppTheme.textSecondary,
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 16),
+          child: Text(
+            'RECENT HIGHLIGHTS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 2,
+              color: Colors.white54,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
         SizedBox(
-          height: 120,
+          height: 140,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: 3,
+            itemCount: 5,
             itemBuilder: (context, index) {
-              return Container(
-                width: 100,
-                margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(
-                  color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://picsum.photos/200'),
-                    fit: BoxFit.cover,
-                    opacity: 0.6,
-                  ),
-                ),
-                child: const Stack(
-                  children: [
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      child: Text(
-                        '0:30',
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              return Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Hero(
+                  tag: 'clip_$index',
+                  child: GlassCard(
+                    padding: EdgeInsets.zero,
+                    glowColor: index == 0 ? AppTheme.primaryNeon : null,
+                    child: Container(
+                      width: 120,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        image: DecorationImage(
+                          image: NetworkImage('https://picsum.photos/seed/${index + 10}0/300/400'),
+                          fit: BoxFit.cover,
+                          opacity: 0.5,
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          if (index == 0)
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryNeon,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text('NEW', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          const Center(
+                            child: Icon(LucideIcons.playCircle, color: Colors.white, size: 32),
+                          ),
+                        ],
                       ),
                     ),
-                    Center(
-                      child: Icon(LucideIcons.play, color: Colors.white, size: 24),
-                    ),
-                  ],
+                  ),
                 ),
               );
             },
           ),
-        ),
+        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0),
       ],
     );
   }
