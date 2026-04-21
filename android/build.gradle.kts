@@ -24,6 +24,14 @@ tasks.register<Delete>("clean") {
 }
 
 subprojects {
+    project.configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "androidx.core" && requested.name == "core") {
+                useVersion("1.6.0")
+            }
+        }
+    }
+
     val fixNamespace = Action<Project> {
         val android = extensions.findByName("android")
         if (android is com.android.build.gradle.BaseExtension) {
@@ -31,9 +39,6 @@ subprojects {
                 val groupPath = group.toString()
                 android.namespace = if (groupPath.isNotEmpty()) groupPath else "com.plugin.${name.replace("-", ".")}"
             }
-            // Fix for lStar error
-            android.compileSdkVersion(34)
-            android.defaultConfig.targetSdkVersion(34)
         }
     }
     if (state.executed) {

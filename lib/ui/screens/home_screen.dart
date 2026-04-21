@@ -56,22 +56,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'HYPESHOT',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 4,
-                color: Colors.white,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'HYPESHOT',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 4,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            const HypeMeter(level: 0.72),
-          ],
+              const SizedBox(height: 12),
+              const HypeMeter(level: 0.72),
+            ],
+          ),
         ),
+        const SizedBox(width: 24),
         GestureDetector(
           onTap: () => context.push('/profile'),
           child: Hero(
@@ -172,9 +175,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: app is ApplicationWithIcon 
-                                ? Image.memory((app as ApplicationWithIcon).icon, fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(0.8))
-                                : const Icon(LucideIcons.layoutGrid, size: 20),
+                            child: Consumer(
+                              builder: (context, ref, _) {
+                                final iconAsync = ref.watch(appIconProvider(app.packageName));
+                                return iconAsync.when(
+                                  data: (iconData) => iconData != null
+                                      ? Image.memory(iconData, fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(0.8))
+                                      : const Icon(LucideIcons.layoutGrid, size: 20),
+                                  loading: () => const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24))),
+                                  error: (_, __) => const Icon(LucideIcons.layoutGrid, size: 20),
+                                );
+                              },
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),

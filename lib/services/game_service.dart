@@ -7,7 +7,7 @@ class GameService {
     List<Application> apps = await DeviceApps.getInstalledApplications(
       onlyAppsWithLaunchIntent: true,
       includeSystemApps: false,
-      includeAppIcons: true,
+      includeAppIcons: false,
     );
 
     // Sort alphabetically
