@@ -62,9 +62,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
                     'GALLERY',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5),
                   ),
-                  Text(
-                    '${_clips.length} CLIPS',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppTheme.textDim, letterSpacing: 1),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(LucideIcons.refreshCw, size: 16, color: AppTheme.textDim),
+                        onPressed: _loadClips,
+                      ),
+                      Text(
+                        '${_clips.length} CLIPS',
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppTheme.textDim, letterSpacing: 1),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -109,29 +117,32 @@ class _GalleryScreenState extends State<GalleryScreen> {
       ),
       itemCount: _clips.length,
       itemBuilder: (context, index) {
-        final clip = _clips[index];
+        final media = _clips[index];
+        final isImage = media.path.endsWith('.jpg') || media.path.endsWith('.jpeg');
+
         return GestureDetector(
           onTap: () async {
-            await context.push('/preview', extra: clip.path);
+            await context.push('/preview', extra: media.path);
             _loadClips();
           },
           onLongPress: () async {
-             // Quick delete action
-             await GalleryService.deleteClip(clip.path);
+             await GalleryService.deleteClip(media.path);
              _loadClips();
           },
           child: Container(
             decoration: AppTheme.studioCard(),
             clipBehavior: Clip.antiAlias,
-            child: FutureBuilder<String?>(
-              future: _getThumbnail(clip.path),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  return Image.file(File(snapshot.data!), fit: BoxFit.cover);
-                }
-                return Container(color: AppTheme.bgElevated);
-              },
-            ),
+            child: isImage
+                ? Image.file(media, fit: BoxFit.cover)
+                : FutureBuilder<String?>(
+                    future: _getThumbnail(media.path),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data != null) {
+                        return Image.file(File(snapshot.data!), fit: BoxFit.cover);
+                      }
+                      return Container(color: AppTheme.bgElevated);
+                    },
+                  ),
           ),
         );
       },

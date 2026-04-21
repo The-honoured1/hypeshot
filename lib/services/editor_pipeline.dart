@@ -27,9 +27,11 @@ class EditorPipeline {
     return current; // Fallback to current chunk
   }
 
-  /// Auto-trims, applies 9:16 vertical crop, adds captions.
+  /// Real Trimming, applications of 9:16 vertical crop, and captions.
   static Future<String?> processHighlight({
     required String inputPath,
+    Duration start = Duration.zero,
+    Duration? duration,
     bool verticalCrop = true,
     String? caption,
   }) async {
@@ -43,15 +45,21 @@ class EditorPipeline {
       filters.add("crop=ih*9/16:ih");
     }
 
-    // Dynamic Captions
+    // Dynamic Captions (Centered)
     if (caption != null && caption.isNotEmpty) {
-      // Basic text overlay. In a real app we'd load a local TTF.
+      // Basic text overlay. 
       filters.add("drawtext=text='$caption':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2");
     }
 
     String filterStr = filters.isNotEmpty ? '-vf "${filters.join(',')}"' : '';
-    // Auto-trim last 30 seconds: -sseof -30
-    final session = await FFmpegKit.execute('-sseof -30 -i $inputPath $filterStr -y $outPath');
+    
+    // Timing logic
+    String ss = "-ss ${start.inMilliseconds / 1000.0}";
+    String t = duration != null ? "-t ${duration.inMilliseconds / 1000.0}" : "";
+    
+    // Core FFmpeg command
+    // Note: -ss before -i is faster for large files
+    final session = await FFmpegKit.execute('$ss -i $inputPath $t $filterStr -c:v libx264 -preset ultrafast -y $outPath');
     final returnCode = await session.getReturnCode();
 
     if (ReturnCode.isSuccess(returnCode)) {

@@ -11,9 +11,10 @@ class GalleryService {
     return galleryDir;
   }
 
-  static Future<String> saveClipToGallery(String sourcePath) async {
+  static Future<String> saveMediaToGallery(String sourcePath, {bool isImage = false}) async {
     final galleryDir = await getGalleryDirectory();
-    final fileName = 'hypeshot_${DateTime.now().millisecondsSinceEpoch}.mp4';
+    final ext = isImage ? 'jpg' : 'mp4';
+    final fileName = 'hypeshot_${DateTime.now().millisecondsSinceEpoch}.$ext';
     final savedPath = '${galleryDir.path}/$fileName';
     
     final sourceFile = File(sourcePath);
@@ -21,11 +22,13 @@ class GalleryService {
     return savedPath;
   }
 
+  static Future<String> saveClipToGallery(String sourcePath) => saveMediaToGallery(sourcePath, isImage: false);
+
   static Future<List<File>> getSavedClips() async {
     final galleryDir = await getGalleryDirectory();
     final files = galleryDir.listSync()
         .whereType<File>()
-        .where((f) => f.path.endsWith('.mp4'))
+        .where((f) => f.path.endsWith('.mp4') || f.path.endsWith('.jpg') || f.path.endsWith('.jpeg'))
         .toList();
     
     // Sort by most recent first

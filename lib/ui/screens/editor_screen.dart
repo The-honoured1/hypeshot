@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../services/share_service.dart';
 import '../../services/editor_pipeline.dart';
+import '../../services/gallery_service.dart';
 import '../widgets/glass_widgets.dart';
 
 class EditorScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _EditorScreenState extends State<EditorScreen> {
   bool _initialized = false;
   bool _isProcessing = false;
   String _errorMessage = "";
+  String _caption = "";
 
   @override
   void initState() {
@@ -150,7 +152,7 @@ class _EditorScreenState extends State<EditorScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _tool(LucideIcons.scissors, 'TRIM'),
-              _tool(LucideIcons.type, 'CAPTION'),
+              _tool(LucideIcons.type, 'CAPTION', onTap: _showCaptionDialog),
               _tool(LucideIcons.zoomIn, 'ZOOM'),
             ],
           ),
@@ -159,13 +161,45 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
-  Widget _tool(IconData icon, String label) {
-    return Column(
-      children: [
-        Icon(icon, size: 20, color: AppTheme.textMain),
-        const SizedBox(height: 6),
-        Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
-      ],
+  Widget _tool(IconData icon, String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: AppTheme.textMain),
+          const SizedBox(height: 6),
+          Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
+        ],
+      ),
+    );
+  }
+
+  void _showCaptionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.bgSlate,
+        title: const Text('ADD CAPTION', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
+        content: TextField(
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'Enter text...',
+            hintStyle: TextStyle(color: AppTheme.textDim),
+          ),
+          onChanged: (v) => _caption = v,
+        ),
+        actions: [
+          TextButton(
+            child: const Text('CANCEL', style: TextStyle(color: AppTheme.textDim)),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: const Text('DONE', style: TextStyle(color: AppTheme.accentAmber)),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -180,10 +214,29 @@ class _EditorScreenState extends State<EditorScreen> {
 
   Future<void> _exportVideo() async {
     setState(() => _isProcessing = true);
-    await ShareService.saveToGallery(_controller.file.path);
-    if (mounted) {
-      setState(() => _isProcessing = false);
-      context.pop();
+    
+    // Step 1: Real Processing with EditorPipeline
+    final processedPath = await EditorPipeline.processHighlight(
+      inputPath: _controller.file.path,
+      start: _controller.startTrim,
+      duration: _controller.endTrim - _controller.startTrim,
+      caption: _caption,
+    );
+
+    if (processedPath != null) {
+      // Step 2: Unified storage in the internal stash (fix empty gallery)
+      await GalleryService.saveClipToGallery(processedPath);
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        context.go('/gallery'); // Success redirect
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = "EXPORT FAILED";
+        });
+      }
     }
   }
 }
