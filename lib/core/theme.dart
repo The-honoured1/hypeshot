@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color background = Color(0xFF0B0F19); // Mist Slate
-  static const Color surface = Color(0xFF151A28);    // Mist Surface
-  static const Color accent = Color(0xFF8AB4F8);     // Muted Blue Accent
-  static const Color textPrimary = Color(0xFFF1F3F4);
-  static const Color textSecondary = Color(0xFF9AA0A6);
-  static const Color alert = Color(0xFFF28B82);      // Muted Red
+  static const Color background = Color(0xFF0A0A0C); // Deep Obsidian
+  static const Color surface = Color(0xFF121216);    // Flat Charcoal
+  static const Color accent = Color(0xFFE2E8F0);     // Glacial White
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF71717A); // Zinc 500
+  static const Color alert = Color(0xFF3F3F46);      // Muted Zinc instead of red/alert
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -22,35 +22,39 @@ class AppTheme {
         onSurface: textPrimary,
         error: alert,
       ),
-      textTheme: GoogleFonts.interTextTheme( // Clean, legible sans-serif
+      textTheme: GoogleFonts.interTextTheme( // Keep clean font
         const TextTheme(
           displayLarge: TextStyle(
             fontSize: 28, 
             fontWeight: FontWeight.w600, 
             color: textPrimary,
-            letterSpacing: -0.5,
+            letterSpacing: 0.5, // Increased spacing for abstract feel
           ),
           displayMedium: TextStyle(
             fontSize: 22, 
-            fontWeight: FontWeight.w600, 
+            fontWeight: FontWeight.w500, 
             color: textPrimary,
+            letterSpacing: 0.5,
           ),
           titleMedium: TextStyle(
             fontSize: 16, 
             fontWeight: FontWeight.w500, 
             color: textPrimary, 
+            letterSpacing: 0.5,
           ),
           bodyLarge: TextStyle(
             fontSize: 16, 
             fontWeight: FontWeight.w400,
             color: textPrimary, 
-            height: 1.5,
+            height: 1.6,
+            letterSpacing: 0.2,
           ),
           bodyMedium: TextStyle(
             fontSize: 14, 
             fontWeight: FontWeight.w400,
             color: textSecondary, 
-            height: 1.4,
+            height: 1.5,
+            letterSpacing: 0.2,
           ),
         ),
       ),
@@ -58,43 +62,38 @@ class AppTheme {
   }
 
   static BoxDecoration glass({
-    double blur = 30, // Deep frost
-    double opacity = 0.03, // Ultra-subtle
+    double blur = 40, // More frosted blur
+    double opacity = 0.02, // Sheer
     BorderRadius? radius,
     Color? color,
   }) {
     return BoxDecoration(
       color: (color ?? Colors.white).withOpacity(opacity),
-      borderRadius: radius ?? BorderRadius.circular(16), // Softer pill corners
+      borderRadius: radius ?? BorderRadius.circular(12), // Tighter pill corners
       border: Border.all(
-        color: Colors.white.withOpacity(0.05), // Ultra-thin hair border
-        width: 0.5,
+        color: Colors.white.withOpacity(0.04), // Barely visible hairline limit
+        width: 1.0,
       ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.2), // Neomorphic drop down shadow
-          blurRadius: 20,
-          offset: const Offset(0, 8),
-        ),
-      ],
+      // Neomorphism removed completely
     );
   }
 
   static LinearGradient meshGradient() {
-    // Replaced with a completely subtle mist gradient
+    // Monochromatic deep space gradient
     return const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
       colors: [
-        Color(0xFF0B0F19), // Mist Slate
-        Color(0xFF05070C), // Darker slate
+        Color(0xFF0A0A0C), 
+        Color(0xFF0E0E12),
+        Color(0xFF050507),
       ],
     );
   }
 
-  static Widget glassOverlay({required Widget child, double blur = 30}) {
+  static Widget glassOverlay({required Widget child, double blur = 40}) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: child,

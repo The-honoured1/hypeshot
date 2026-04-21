@@ -23,6 +23,8 @@ class _EditorScreenState extends State<EditorScreen> {
   bool _isControllerInitialized = false;
   bool _isSlowMo = false;
   String _overlayText = "";
+  bool _hasError = false;
+  String _errorMessage = "";
   bool _isProcessing = false;
 
   @override
@@ -40,12 +42,8 @@ class _EditorScreenState extends State<EditorScreen> {
     final prev = widget.chunks!['previous'];
     final curr = widget.chunks!['current'];
     
-    // We should import EditorPipeline
-    // For now we assume EditorPipeline is available 
-    // imported: import '../../services/editor_pipeline.dart';
     final mergedPath = await EditorPipeline.mergeChunks(prev, curr);
     
-    // Auto highlight process
     final finalPath = await EditorPipeline.processHighlight(
       inputPath: mergedPath ?? '/dummy/path/clip.mp4',
       verticalCrop: true,
@@ -63,6 +61,16 @@ class _EditorScreenState extends State<EditorScreen> {
       _controller.dispose();
     }
     final file = File(path);
+    if (!file.existsSync() || path.contains('dummy')) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _errorMessage = "empty canvas.\nno capture found.";
+        });
+      }
+      return;
+    }
+    
     _controller = VideoEditorController.file(
       file,
       minDuration: const Duration(seconds: 1),
@@ -70,6 +78,13 @@ class _EditorScreenState extends State<EditorScreen> {
     )..initialize().then((_) {
       if (mounted) {
         setState(() => _isControllerInitialized = true);
+      }
+    }).catchError((e) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _errorMessage = "could not load framework: $e";
+        });
       }
     });
   }
@@ -84,13 +99,12 @@ class _EditorScreenState extends State<EditorScreen> {
 
   Future<void> _exportVideo() async {
     setState(() => _isProcessing = true);
-    // Actually save to gallery leveraging ShareService
     await ShareService.saveToGallery(_controller.file.path);
     if (mounted) {
       setState(() => _isProcessing = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Saved to Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
+          content: Text('saved to local.', style: TextStyle(fontWeight: FontWeight.w400)),
           backgroundColor: AppTheme.surface,
           behavior: SnackBarBehavior.floating,
         ),
@@ -105,79 +119,103 @@ class _EditorScreenState extends State<EditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('EDIT PROJECT', style: TextStyle(letterSpacing: 1, fontSize: 13, fontWeight: FontWeight.w700)),
-        leading: IconButton(icon: const Icon(LucideIcons.x, size: 20), onPressed: () => context.pop()),
-        actions: [
-          TextButton(
-            onPressed: _isProcessing ? null : _shareVideo,
-            child: const Row(
-              children: [
-                Icon(LucideIcons.share2, color: AppTheme.textPrimary, size: 14),
-                SizedBox(width: 4),
-                Text('SHARE', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: TextButton(
-              onPressed: _isProcessing ? null : _exportVideo,
-              child: const Text('SAVE', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
-            ),
-          ),
-        ],
-      ),
-      body: _isControllerInitialized && _controller.initialized
-          ? Stack(
-              children: [
-                Column(
+      backgroundColor: Colors.black,
+      body: _hasError
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.videoOff, color: AppTheme.textSecondary, size: 32),
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.5, letterSpacing: 0.5),
+                  ),
+                  const SizedBox(height: 32),
+                  GestureDetector(
+                    onTap: () => context.pop(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white24),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: const Text('return', style: TextStyle(color: Colors.white, fontSize: 11, letterSpacing: 1)),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : _isControllerInitialized && _controller.initialized
+              ? Stack(
                   children: [
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CropGridViewer.preview(controller: _controller),
-                              if (_overlayText.isNotEmpty)
-                                Center(
-                                  child: Text(
-                                    _overlayText,
-                                    style: const TextStyle(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      letterSpacing: -1,
-                                    ),
-                                  ).animate().fadeIn(duration: 400.ms),
+                    // Canvas
+                    Positioned.fill(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CropGridViewer.preview(controller: _controller),
+                          if (_overlayText.isNotEmpty)
+                            Center(
+                              child: Text(
+                                _overlayText.toLowerCase(),
+                                style: const TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white,
+                                  letterSpacing: -1,
                                 ),
-                              _buildPlayPause(),
+                              ).animate().fadeIn(duration: 400.ms),
+                            ),
+                          _buildPlayPause(),
+                        ],
+                      ),
+                    ),
+                    // Floating Header
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                icon: const Icon(LucideIcons.chevronLeft, size: 24, color: Colors.white),
+                                onPressed: () => context.pop(),
+                              ),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(LucideIcons.send, size: 20, color: Colors.white),
+                                    onPressed: _isProcessing ? null : _shareVideo,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: const Icon(LucideIcons.download, size: 20, color: Colors.white),
+                                    onPressed: _isProcessing ? null : _exportVideo,
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 140),
+                    // Floating Dock
+                    _buildMinimalDock(),
+                    if (_isProcessing) _buildCalmOverlay(),
+                  ],
+                )
+              : Stack(
+                  children: [
+                    const Center(child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white54)),
+                    if (_isProcessing) _buildCalmOverlay(),
                   ],
                 ),
-                _buildMinimalDock(),
-                if (_isProcessing) _buildCalmOverlay(),
-                if (_isProcessing) _buildCalmOverlay(),
-              ],
-            )
-          : Stack(
-              children: [
-                const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                if (_isProcessing) _buildCalmOverlay(),
-              ],
-            ),
     );
   }
 
@@ -186,16 +224,22 @@ class _EditorScreenState extends State<EditorScreen> {
       opacity: _controller.isPlaying ? 0 : 1,
       duration: const Duration(milliseconds: 200),
       child: GestureDetector(
-        onTap: () => _controller.video.play(),
+        onTap: () {
+          if (_controller.isPlaying) {
+             _controller.video.pause();
+          } else {
+             _controller.video.play();
+          }
+        },
         child: Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: Colors.black26,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          width: 80,
+          height: 80,
+          decoration: const BoxDecoration(
+            color: Colors.transparent,
           ),
-          child: const Icon(LucideIcons.play, size: 24, color: Colors.white),
+          child: const Center(
+            child: Icon(LucideIcons.play, size: 32, color: Colors.white54),
+          ),
         ),
       ),
     );
@@ -203,34 +247,31 @@ class _EditorScreenState extends State<EditorScreen> {
 
   Widget _buildMinimalDock() {
     return Positioned(
-      bottom: 24,
+      bottom: 32,
       left: 24,
       right: 24,
-      child: GlassCard(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 40,
-              child: TrimSlider(
-                controller: _controller,
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 40,
+            child: TrimSlider(
+              controller: _controller, 
             ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _toolIcon(LucideIcons.timer, 'Slow', _isSlowMo, () => setState(() => _isSlowMo = !_isSlowMo)),
-                _toolIcon(LucideIcons.type, 'Text', _overlayText.isNotEmpty, _showTextInput),
-                _toolIcon(LucideIcons.maximize, 'Crop', false, () {}),
-                _toolIcon(LucideIcons.volume2, 'Audio', false, () {}),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn();
+          ),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _toolIcon(LucideIcons.timer, 'slow', _isSlowMo, () => setState(() => _isSlowMo = !_isSlowMo)),
+              _toolIcon(LucideIcons.type, 'text', _overlayText.isNotEmpty, _showTextInput),
+              _toolIcon(LucideIcons.crop, 'crop', false, () {}),
+              _toolIcon(LucideIcons.volume2, 'audio', false, () {}),
+            ],
+          ),
+        ],
+      ).animate().fadeIn(duration: 600.ms),
+    );
   }
 
   Widget _toolIcon(IconData icon, String label, bool active, VoidCallback onTap) {
@@ -238,14 +279,14 @@ class _EditorScreenState extends State<EditorScreen> {
       onTap: onTap,
       child: Column(
         children: [
-          Icon(icon, color: active ? Colors.white : Colors.white24, size: 20),
-          const SizedBox(height: 8),
+          Icon(icon, color: active ? Colors.white : Colors.white38, size: 18),
+          const SizedBox(height: 6),
           Text(
             label,
             style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              color: active ? Colors.white : Colors.white24,
+              fontSize: 10,
+              fontWeight: FontWeight.w400,
+              color: active ? Colors.white : Colors.white38,
               letterSpacing: 0.5,
             ),
           ),
@@ -256,20 +297,20 @@ class _EditorScreenState extends State<EditorScreen> {
 
   Widget _buildCalmOverlay() {
     return Container(
-      color: AppTheme.background.withOpacity(0.9),
-      child: Center(
+      color: Colors.black.withOpacity(0.85),
+      child: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(strokeWidth: 2, color: AppTheme.textSecondary),
-            const SizedBox(height: 32),
-            const Text(
-              'Saving Project...',
+            SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white)),
+            SizedBox(height: 32),
+            Text(
+              'saving...',
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary,
-                letterSpacing: 0.5,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: AppTheme.textSecondary,
+                letterSpacing: 1,
               ),
             ),
           ],
@@ -287,33 +328,47 @@ class _EditorScreenState extends State<EditorScreen> {
         String current = _overlayText;
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: GlassCard(
-            radius: const BorderRadius.only(topLeft: Radius.circular(32), topRight: Radius.circular(32)),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 4),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(2))),
+                const SizedBox(height: 12),
+                Container(width: 32, height: 4, decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(2))),
                 const SizedBox(height: 32),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: TextField(
                     autofocus: true,
                     textAlign: TextAlign.center,
-                    decoration: const InputDecoration(hintText: 'Add Caption...', border: InputBorder.none, hintStyle: TextStyle(color: Colors.white12)),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                    decoration: const InputDecoration(hintText: 'abstract mark...', border: InputBorder.none, hintStyle: TextStyle(color: Colors.white24)),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w400, color: Colors.white, letterSpacing: -0.5),
                     onChanged: (v) => current = v,
                   ),
                 ),
                 const SizedBox(height: 48),
-                HypeButton(
-                  label: 'Add to Project',
+                GestureDetector(
                   onTap: () {
                     setState(() => _overlayText = current);
                     Navigator.pop(context);
                   },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 40),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppTheme.textPrimary,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Center(
+                      child: Text('embed', style: TextStyle(color: AppTheme.surface, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 40),
               ],
             ),
           ),

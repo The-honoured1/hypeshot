@@ -41,7 +41,7 @@ class HypeMeter extends StatelessWidget {
               width: MediaQuery.of(context).size.width * level * 0.8,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(1),
-                color: Colors.white.withOpacity(0.8),
+                color: AppTheme.accent,
               ),
             ),
           ],

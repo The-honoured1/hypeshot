@@ -25,13 +25,7 @@ class HypeButton extends StatelessWidget {
         decoration: isPrimary ? BoxDecoration(
           color: AppTheme.accent,
           borderRadius: BorderRadius.circular(24), // Smooth rounded corners
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15), // Neomorphic drop
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
-          ],
+
         ) : AppTheme.glass(radius: BorderRadius.circular(24)),
         child: Row(
           mainAxisSize: MainAxisSize.min,

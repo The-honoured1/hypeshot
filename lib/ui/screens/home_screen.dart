@@ -61,10 +61,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Hypeshot',
+                'hypeshot.',
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
                   letterSpacing: -0.5,
                   color: AppTheme.textPrimary,
                 ),
@@ -79,49 +79,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildControlPanel(bool isRecording) {
-    return Row(
-      children: [
-        GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (isRecording) const RecordingWave() else Icon(LucideIcons.circle, size: 12, color: Colors.white.withOpacity(0.2)),
-              const SizedBox(width: 12),
+              if (isRecording) const RecordingWave() else Icon(LucideIcons.circle, size: 10, color: Colors.white.withOpacity(0.2)),
+              const SizedBox(width: 8),
               Text(
-                isRecording ? 'RECORDING' : 'STANDBY',
+                isRecording ? 'recording' : 'standby',
                 style: TextStyle(
-                  color: isRecording ? Colors.white : Colors.white24,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
+                  color: isRecording ? Colors.white : Colors.white54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GlassCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+          GestureDetector(
+            onTap: () => setState(() => _autoRecord = !_autoRecord),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('AUTO-CAPTURE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white54)),
-                Transform.scale(
-                  scale: 0.7,
-                  child: Switch(
-                    value: _autoRecord,
-                    onChanged: (v) => setState(() => _autoRecord = v),
-                    activeColor: Colors.white,
-                    activeTrackColor: Colors.white.withOpacity(0.2),
-                  ),
-                ),
+                Text('auto-capture', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: _autoRecord ? Colors.white : Colors.white38)),
+                const SizedBox(width: 6),
+                Icon(_autoRecord ? LucideIcons.checkCircle2 : LucideIcons.circle, size: 14, color: _autoRecord ? Colors.white : Colors.white38),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -129,13 +118,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'LAST PLAYED',
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white38),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            'library',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppTheme.textSecondary),
+          ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         SizedBox(
-          height: 80,
+          height: 70,
           child: appsAsync.when(
             data: (apps) => ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -143,29 +135,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               itemBuilder: (context, index) {
                 final app = apps[index];
                 return Padding(
-                  padding: const EdgeInsets.only(right: 20),
+                  padding: const EdgeInsets.only(right: 16),
                   child: GestureDetector(
                     onTap: () => _launchGameWithRecord(app.packageName),
                     child: Column(
                       children: [
                         Container(
-                          width: 54,
-                          height: 54,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: Colors.white.withOpacity(0.05)),
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(24),
                             child: Consumer(
                               builder: (context, ref, _) {
                                 final iconAsync = ref.watch(appIconProvider(app.packageName));
                                 return iconAsync.when(
                                   data: (iconData) => iconData != null
-                                      ? Image.memory(iconData, fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(0.8))
-                                      : const Icon(LucideIcons.layoutGrid, size: 20),
-                                  loading: () => const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24))),
-                                  error: (_, __) => const Icon(LucideIcons.layoutGrid, size: 20),
+                                      ? Image.memory(iconData, fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(0.9))
+                                      : const Icon(LucideIcons.layoutGrid, size: 20, color: AppTheme.textSecondary),
+                                  loading: () => const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white24))),
+                                  error: (_, __) => const Icon(LucideIcons.layoutGrid, size: 20, color: AppTheme.textSecondary),
                                 );
                               },
                             ),
@@ -175,11 +166,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         SizedBox(
                           width: 54,
                           child: Text(
-                            app.appName,
+                            app.appName.toLowerCase(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w500, color: Colors.white54),
+                            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w400, color: AppTheme.textSecondary),
                           ),
                         ),
                       ],
@@ -188,8 +179,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               },
             ),
-            loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-            error: (e, s) => const Text('Error loading apps'),
+            loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 1.5, color: AppTheme.textSecondary)),
+            error: (e, s) => const Text('could not load library', style: TextStyle(color: AppTheme.textSecondary)),
           ),
         ),
       ],
@@ -207,39 +198,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Center(
       child: Column(
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 240,
-                height: 240,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withOpacity(0.03), width: 2),
+          const SizedBox(height: 48),
+          GestureDetector(
+            onTap: () async {
+              if (isRecording) {
+                final chunks = await ref.read(recordingProvider.notifier).stop();
+                if ((chunks['current'] != null || chunks['previous'] != null) && mounted) {
+                  context.push('/editor', extra: chunks);
+                }
+              } else {
+                await ref.read(recordingProvider.notifier).start();
+              }
+            },
+            child: AnimatedContainer(
+              duration: 300.ms,
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isRecording ? AppTheme.accent.withOpacity(0.05) : Colors.transparent,
+                border: Border.all(
+                  color: isRecording ? AppTheme.accent : Colors.white.withOpacity(0.1),
+                  width: 1,
                 ),
               ),
-              HypeButton(
-                label: isRecording ? 'Finish Recording' : 'Capture Project',
-                icon: isRecording ? LucideIcons.check : LucideIcons.camera,
-                isPrimary: true,
-                onTap: () async {
-                  if (isRecording) {
-                    final chunks = await ref.read(recordingProvider.notifier).stop();
-                    if ((chunks['current'] != null || chunks['previous'] != null) && mounted) {
-                      context.push('/editor', extra: chunks);
-                    }
-                  } else {
-                    context.push('/editor');
-                  }
-                },
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isRecording ? LucideIcons.focus : LucideIcons.play,
+                      size: 32,
+                      color: isRecording ? AppTheme.textPrimary : AppTheme.textSecondary,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      isRecording ? 'capture shape' : 'initiate',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: isRecording ? AppTheme.textPrimary : AppTheme.textSecondary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'TAP TO RECORD HIGHLIGHT',
-            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: Colors.white24, letterSpacing: 1),
-          ).animate().fadeIn(delay: 500.ms),
+          const SizedBox(height: 32),
+          Text(
+            isRecording ? 'tap to extract' : 'tap to buffer',
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: AppTheme.textSecondary, letterSpacing: 0.5),
+          ).animate(target: isRecording ? 1 : 0).fadeIn(delay: 200.ms),
         ],
       ),
     );
