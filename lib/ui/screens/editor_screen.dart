@@ -6,11 +6,13 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../services/share_service.dart';
+import '../../services/editor_pipeline.dart';
 import '../widgets/glass_widgets.dart';
 
 class EditorScreen extends StatefulWidget {
   final String? videoPath;
-  const EditorScreen({super.key, this.videoPath});
+  final Map<String, String?>? chunks;
+  const EditorScreen({super.key, this.videoPath, this.chunks});
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
@@ -18,6 +20,7 @@ class EditorScreen extends StatefulWidget {
 
 class _EditorScreenState extends State<EditorScreen> {
   late VideoEditorController _controller;
+  bool _isControllerInitialized = false;
   bool _isSlowMo = false;
   String _overlayText = "";
   bool _isProcessing = false;
@@ -25,17 +28,57 @@ class _EditorScreenState extends State<EditorScreen> {
   @override
   void initState() {
     super.initState();
-    final file = File(widget.videoPath ?? '/dummy/path/clip.mp4');
+    if (widget.chunks != null) {
+      _processChunks();
+    } else {
+      _initEditor(widget.videoPath ?? '/dummy/path/clip.mp4');
+    }
+  }
+
+  Future<void> _processChunks() async {
+    setState(() => _isProcessing = true);
+    final prev = widget.chunks!['previous'];
+    final curr = widget.chunks!['current'];
+    
+    // We should import EditorPipeline
+    // For now we assume EditorPipeline is available 
+    // imported: import '../../services/editor_pipeline.dart';
+    final mergedPath = await EditorPipeline.mergeChunks(prev, curr);
+    
+    // Auto highlight process
+    final finalPath = await EditorPipeline.processHighlight(
+      inputPath: mergedPath ?? '/dummy/path/clip.mp4',
+      verticalCrop: true,
+      caption: "HYPE MOMENT"
+    );
+    
+    if (mounted) {
+      _initEditor(finalPath ?? mergedPath ?? '/dummy/path/clip.mp4');
+      setState(() => _isProcessing = false);
+    }
+  }
+
+  void _initEditor(String path) {
+    if (_isControllerInitialized) {
+      _controller.dispose();
+    }
+    final file = File(path);
     _controller = VideoEditorController.file(
       file,
       minDuration: const Duration(seconds: 1),
       maxDuration: const Duration(seconds: 30),
-    )..initialize().then((_) => setState(() {}));
+    )..initialize().then((_) {
+      if (mounted) {
+        setState(() => _isControllerInitialized = true);
+      }
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_isControllerInitialized) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -72,7 +115,7 @@ class _EditorScreenState extends State<EditorScreen> {
           ),
         ],
       ),
-      body: _controller.initialized
+      body: _isControllerInitialized && _controller.initialized
           ? Stack(
               children: [
                 Column(
@@ -112,9 +155,15 @@ class _EditorScreenState extends State<EditorScreen> {
                 ),
                 _buildMinimalDock(),
                 if (_isProcessing) _buildCalmOverlay(),
+                if (_isProcessing) _buildCalmOverlay(),
               ],
             )
-          : const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          : Stack(
+              children: [
+                const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                if (_isProcessing) _buildCalmOverlay(),
+              ],
+            ),
     );
   }
 

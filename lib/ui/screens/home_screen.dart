@@ -78,6 +78,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(width: 24),
         GestureDetector(
+          onTap: () => context.push('/feed'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white12,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              children: [
+                Icon(LucideIcons.playSquare, color: Colors.white, size: 14),
+                SizedBox(width: 4),
+                Text('FEED', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        GestureDetector(
           onTap: () => context.push('/profile'),
           child: Hero(
             tag: 'profile_avatar',
