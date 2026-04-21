@@ -60,14 +60,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'hypeshot.',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -0.5,
-                  color: AppTheme.textPrimary,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'hypeshot.',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.5,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(LucideIcons.image, size: 20, color: AppTheme.textSecondary),
+                    onPressed: () => context.push('/gallery'),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               const HypeMeter(level: 0.85),
