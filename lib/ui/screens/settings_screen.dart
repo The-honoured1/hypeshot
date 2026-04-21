@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme.dart';
+import '../../providers/floating_button_provider.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   int _bufferLength = 30;
   String _quality = 'HD';
   bool _autoSave = true;
 
   @override
   Widget build(BuildContext context) {
+    final fbSettings = ref.watch(floatingButtonProvider);
+    final fbNotifier = ref.read(floatingButtonProvider.notifier);
+
     return Scaffold(
       backgroundColor: AppTheme.bgInk,
       appBar: AppBar(
@@ -58,6 +63,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               });
             },
           ),
+          const SizedBox(height: 32),
+          _sectionHeader('FLOATING CONTROLS'),
+          _buildActionToggle('CAPTURE', fbSettings.enabledActions.contains('capture'), (v) {
+            final actions = List<String>.from(fbSettings.enabledActions);
+            v ? actions.add('capture') : actions.remove('capture');
+            fbNotifier.updateEnabledActions(actions);
+          }),
+          _buildActionToggle('PAUSE', fbSettings.enabledActions.contains('pause'), (v) {
+            final actions = List<String>.from(fbSettings.enabledActions);
+            v ? actions.add('pause') : actions.remove('pause');
+            fbNotifier.updateEnabledActions(actions);
+          }),
+          _buildActionToggle('SCREENSHOT', fbSettings.enabledActions.contains('screenshot'), (v) {
+            final actions = List<String>.from(fbSettings.enabledActions);
+            v ? actions.add('screenshot') : actions.remove('screenshot');
+            fbNotifier.updateEnabledActions(actions);
+          }),
+          _buildSliderSetting('OPACITY', fbSettings.opacity, (v) => fbNotifier.updateOpacity(v)),
+          _buildSliderSetting('SCALE', fbSettings.sizeScale, (v) => fbNotifier.updateSizeScale(v), min: 0.8, max: 1.5),
           const SizedBox(height: 32),
           _sectionHeader('WORKFLOW'),
           _buildToggle(
@@ -144,6 +168,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
             activeColor: AppTheme.accentAmber,
             activeTrackColor: AppTheme.accentAmber.withOpacity(0.2),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionToggle(String title, bool value, Function(bool) onChanged) {
+    return _buildToggle(title, value, LucideIcons.checkSquare, onChanged);
+  }
+
+  Widget _buildSliderSetting(String title, double value, Function(double) onChanged, {double min = 0.3, double max = 1.0}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: AppTheme.studioCard(),
+      child: Row(
+        children: [
+          Text(title, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+          Expanded(
+            child: Slider(
+              value: value,
+              min: min,
+              max: max,
+              activeColor: AppTheme.accentAmber,
+              onChanged: onChanged,
+            ),
+          ),
+          Text(value.toStringAsFixed(1), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppTheme.accentAmber)),
         ],
       ),
     );

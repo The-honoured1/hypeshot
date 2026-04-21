@@ -35,14 +35,23 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
     
     // Step 3-5: Floating Button -> Quick Preview Flow
     FlutterOverlayWindow.overlayListener.listen((event) async {
+      final notifier = ref.read(recordingProvider.notifier);
+      
       if (event == "CAPTURE_HIGHLIGHT") {
-        final notifier = ref.read(recordingProvider.notifier);
         final chunks = await notifier.stop();
         if (chunks['current'] != null || chunks['previous'] != null) {
           _handleCaptureSuccess(chunks);
         }
-        // Step 2: Auto-restart buffer to keep loop alive
-        await notifier.start();
+        await notifier.start(); // Auto-restart loop
+      } else if (event == "PAUSE_BUFFER") {
+        await RecordingBufferService.pauseBuffer();
+      } else if (event == "RESUME_BUFFER") {
+        await RecordingBufferService.resumeBuffer();
+      } else if (event == "TAKE_SCREENSHOT") {
+        final path = await RecordingBufferService.takeScreenshot();
+        if (path != null) _showScreenshotNotification(path);
+      } else if (event == "STOP_BUFFER") {
+        await RecordingBufferService.stopBuffer();
       }
     });
   }
@@ -82,6 +91,23 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
          }
        }
      }
+  }
+
+  Future<void> _showScreenshotNotification(String path) async {
+    await flutterLocalNotificationsPlugin.show(
+      1,
+      'SCREENSHOT SAVED',
+      'VIEW IN GALLERY',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'hypeshot_screenshots', 'SCREENSHOTS',
+          importance: Importance.low, 
+          priority: Priority.low,
+          color: Color(0xFFFFA500),
+        ),
+      ),
+      payload: path,
+    );
   }
 
   Future<void> _showStudioNotification(String path) async {

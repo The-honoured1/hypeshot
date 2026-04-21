@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../providers/game_provider.dart';
 import '../widgets/recording_widgets.dart';
@@ -23,7 +24,7 @@ class HomeScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 48),
-                _buildHeader(),
+                _buildHeader(context),
                 const Spacer(),
                 CaptureButton(
                   isRecording: isRecording,

@@ -4,6 +4,8 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:native_screenshot/native_screenshot.dart';
+import 'package:gallery_saver_plus/gallery_saver_plus.dart';
 
 class RecordingBufferService {
   static bool _isBuffering = false;
@@ -107,6 +109,39 @@ class RecordingBufferService {
       _isBuffering = false;
       _bufferingStreamController.add(false);
       return {'current': null, 'previous': null};
+    }
+  }
+
+  static Future<void> pauseBuffer() async {
+    if (!_isBuffering) return;
+    _chunkTimer?.cancel();
+    try {
+      final path = await FlutterScreenRecording.stopRecordScreen;
+      _currentChunkPath = path;
+    } catch (_) {}
+    _isBuffering = false;
+    _bufferingStreamController.add(false);
+  }
+
+  static Future<void> resumeBuffer() async {
+    if (_isBuffering) return;
+    _isBuffering = true;
+    _bufferingStreamController.add(true);
+    await _startNewChunk();
+    _chunkTimer = Timer.periodic(const Duration(seconds: chunkDurationSeconds), (timer) async {
+      await _cycleChunk();
+    });
+  }
+
+  static Future<String?> takeScreenshot() async {
+    try {
+      final path = await NativeScreenshot.takeScreenshot();
+      if (path != null) {
+        await GallerySaver.saveImage(path, albumName: "HypeShot");
+      }
+      return path;
+    } catch (e) {
+      return null;
     }
   }
 
