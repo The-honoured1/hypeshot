@@ -247,17 +247,17 @@ class _EditorScreenState extends State<EditorScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(strokeWidth: 2, color: Colors.white24),
+            const CircularProgressIndicator(strokeWidth: 2, color: AppTheme.textSecondary),
             const SizedBox(height: 32),
             const Text(
               'Saving Project...',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: Colors.white54,
+                color: AppTheme.textPrimary,
                 letterSpacing: 0.5,
               ),
-            ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 3.seconds),
+            ),
           ],
         ),
       ),

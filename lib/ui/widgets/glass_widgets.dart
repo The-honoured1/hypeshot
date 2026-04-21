@@ -17,45 +17,41 @@ class HypeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Modern Calm style: Soft solid fills or ghost borders
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        decoration: BoxDecoration(
-          color: isPrimary ? Colors.white : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12), // Slightly less rounded for a tech-clean look
-          border: isPrimary 
-              ? null 
-              : Border.all(color: Colors.white.withOpacity(0.1)),
-          boxShadow: isPrimary ? [
+        decoration: isPrimary ? BoxDecoration(
+          color: AppTheme.accent,
+          borderRadius: BorderRadius.circular(24), // Smooth rounded corners
+          boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withOpacity(0.15), // Neomorphic drop
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
-          ] : null,
-        ),
+          ],
+        ) : AppTheme.glass(radius: BorderRadius.circular(24)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[
-              Icon(
+               Icon(
                 icon, 
-                color: isPrimary ? AppTheme.background : Colors.white, 
+                color: isPrimary ? AppTheme.background : AppTheme.textPrimary, 
                 size: 18,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
             ],
             Text(
               label,
               style: TextStyle(
-                color: isPrimary ? AppTheme.background : Colors.white,
-                fontWeight: FontWeight.w600,
+                color: isPrimary ? AppTheme.background : AppTheme.textPrimary,
+                fontWeight: FontWeight.w600, // Smooth weight
                 fontSize: 14,
-                letterSpacing: 0.2,
+                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -68,14 +64,12 @@ class HypeButton extends StatelessWidget {
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
-  final Color? glowColor;
   final BorderRadius? radius;
 
   const GlassCard({
     super.key,
     required this.child,
     this.padding,
-    this.glowColor,
     this.radius,
   });
 
@@ -84,14 +78,7 @@ class GlassCard extends StatelessWidget {
     return AppTheme.glassOverlay(
       child: Container(
         padding: padding ?? const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.03),
-          borderRadius: radius ?? BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.05),
-            width: 0.5,
-          ),
-        ),
+        decoration: AppTheme.glass(radius: radius),
         child: child,
       ),
     );

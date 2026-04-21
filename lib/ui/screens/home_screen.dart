@@ -63,16 +63,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'HYPESHOT',
+                'Hypeshot',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 4,
-                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.5,
+                  color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 12),
-              const HypeMeter(level: 0.72),
+              const HypeMeter(level: 0.85),
             ],
           ),
         ),
@@ -80,35 +80,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         GestureDetector(
           onTap: () => context.push('/feed'),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white12,
+              color: AppTheme.surface,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
             child: const Row(
               children: [
-                Icon(LucideIcons.playSquare, color: Colors.white, size: 14),
-                SizedBox(width: 4),
-                Text('FEED', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                Icon(LucideIcons.playSquare, color: AppTheme.textPrimary, size: 14),
+                SizedBox(width: 6),
+                Text('Feed', style: TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w500)),
               ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        GestureDetector(
-          onTap: () => context.push('/profile'),
-          child: Hero(
-            tag: 'profile_avatar',
-            child: Container(
-              padding: const EdgeInsets.all(1.5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-              ),
-              child: const CircleAvatar(
-                radius: 18,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
-              ),
             ),
           ),
         ),

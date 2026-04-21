@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color background = Color(0xFF09090B); // Deepest Black
-  static const Color surface = Color(0xFF131316);    // Dark Void
-  static const Color accent = Color(0xFF00FFCC);     // Cyber Neon Cyan
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFFA1A1AA);
-  static const Color alert = Color(0xFFFF0055);      // Neon Pink
+  static const Color background = Color(0xFF0B0F19); // Mist Slate
+  static const Color surface = Color(0xFF151A28);    // Mist Surface
+  static const Color accent = Color(0xFF8AB4F8);     // Muted Blue Accent
+  static const Color textPrimary = Color(0xFFF1F3F4);
+  static const Color textSecondary = Color(0xFF9AA0A6);
+  static const Color alert = Color(0xFFF28B82);      // Muted Red
 
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: Colors.transparent,
+      scaffoldBackgroundColor: background,
       colorScheme: const ColorScheme.dark(
         primary: accent,
         secondary: accent,
@@ -22,35 +22,33 @@ class AppTheme {
         onSurface: textPrimary,
         error: alert,
       ),
-      textTheme: GoogleFonts.rajdhaniTextTheme( // High-energy cyber/gamer font
+      textTheme: GoogleFonts.interTextTheme( // Clean, legible sans-serif
         const TextTheme(
           displayLarge: TextStyle(
-            fontSize: 32, 
-            fontWeight: FontWeight.w700, 
+            fontSize: 28, 
+            fontWeight: FontWeight.w600, 
             color: textPrimary,
-            letterSpacing: 1.5,
+            letterSpacing: -0.5,
           ),
           displayMedium: TextStyle(
-            fontSize: 24, 
-            fontWeight: FontWeight.w700, 
+            fontSize: 22, 
+            fontWeight: FontWeight.w600, 
             color: textPrimary,
-            letterSpacing: 1.0,
           ),
           titleMedium: TextStyle(
             fontSize: 16, 
-            fontWeight: FontWeight.w700, 
+            fontWeight: FontWeight.w500, 
             color: textPrimary, 
-            letterSpacing: 2.0,
           ),
           bodyLarge: TextStyle(
             fontSize: 16, 
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
             color: textPrimary, 
             height: 1.5,
           ),
           bodyMedium: TextStyle(
             fontSize: 14, 
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
             color: textSecondary, 
             height: 1.4,
           ),
@@ -60,43 +58,43 @@ class AppTheme {
   }
 
   static BoxDecoration glass({
-    double blur = 10, // Sharper for gaming theme
-    double opacity = 0.1, // slightly more visible
+    double blur = 30, // Deep frost
+    double opacity = 0.03, // Ultra-subtle
     BorderRadius? radius,
     Color? color,
   }) {
     return BoxDecoration(
-      color: (color ?? background).withOpacity(opacity),
-      borderRadius: radius ?? BorderRadius.circular(12), // Sharper corners
+      color: (color ?? Colors.white).withOpacity(opacity),
+      borderRadius: radius ?? BorderRadius.circular(16), // Softer pill corners
       border: Border.all(
-        color: accent.withOpacity(0.5), // Electric neon border
-        width: 1.5,
+        color: Colors.white.withOpacity(0.05), // Ultra-thin hair border
+        width: 0.5,
       ),
       boxShadow: [
         BoxShadow(
-          color: accent.withOpacity(0.15),
-          blurRadius: 15,
-          spreadRadius: 2,
+          color: Colors.black.withOpacity(0.2), // Neomorphic drop down shadow
+          blurRadius: 20,
+          offset: const Offset(0, 8),
         ),
       ],
     );
   }
 
   static LinearGradient meshGradient() {
+    // Replaced with a completely subtle mist gradient
     return const LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
       colors: [
-        Color(0xFF1A0A26), // Deep Neon Purple
-        Color(0xFF09090B),
-        Color(0xFF051114), // Deep Cyan undertone
+        Color(0xFF0B0F19), // Mist Slate
+        Color(0xFF05070C), // Darker slate
       ],
     );
   }
 
-  static Widget glassOverlay({required Widget child, double blur = 15}) {
+  static Widget glassOverlay({required Widget child, double blur = 30}) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: child,
