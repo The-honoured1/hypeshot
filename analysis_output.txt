@@ -1,0 +1,27 @@
+Analyzing hypeshot...                                           
+
+   info • Use a 'SizedBox' to add whitespace to a layout • lib/core/navigation.dart:108:14 • sized_box_for_whitespace
+   info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/core/theme.dart:1:8 • unnecessary_import
+   info • Uses 'await' on an instance of 'void', which is not a subtype of 'Future' • lib/main.dart:56:9 • await_only_futures
+  error • This expression has a type of 'void' so its value can't be used • lib/main.dart:56:38 • use_of_void_result
+  error • Target of URI doesn't exist: 'package:gallery_saver_plus/gallery_saver_plus.dart' • lib/services/recording_buffer_service.dart:8:8 • uri_does_not_exist
+warning • The value of the local variable 'extStatus' isn't used • lib/services/recording_buffer_service.dart:29:11 • unused_local_variable
+  error • Undefined name 'GallerySaver' • lib/services/recording_buffer_service.dart:144:15 • undefined_identifier
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/services/share_service.dart:6:11 • deprecated_member_use
+   info • 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/services/share_service.dart:6:17 • deprecated_member_use
+warning • Unused import: 'dart:convert' • lib/ui/overlay/overlay_entry.dart:1:8 • unused_import
+   info • The private field _isRecording could be 'final' • lib/ui/overlay/overlay_entry.dart:24:8 • prefer_final_fields
+warning • The value of the field '_isRecording' isn't used • lib/ui/overlay/overlay_entry.dart:24:8 • unused_field
+warning • Unused import: '../../services/share_service.dart' • lib/ui/screens/editor_screen.dart:7:8 • unused_import
+   info • Statements in an if should be enclosed in a block • lib/ui/screens/editor_screen.dart:63:20 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/ui/screens/editor_screen.dart:68:20 • curly_braces_in_flow_control_structures
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/ui/screens/preview_screen.dart:93:34 • use_build_context_synchronously
+   info • Statements in an if should be enclosed in a block • lib/ui/screens/settings_screen.dart:50:42 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/ui/screens/settings_screen.dart:51:47 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/ui/screens/settings_screen.dart:52:22 • curly_braces_in_flow_control_structures
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/ui/screens/settings_screen.dart:168:13 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/ui/screens/settings_screen.dart:169:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/ui/widgets/glass_widgets.dart:38:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/ui/widgets/recording_widgets.dart:45:52 • deprecated_member_use
+
+23 issues found. (ran in 20.0s)

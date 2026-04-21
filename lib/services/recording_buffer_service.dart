@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'package:native_screenshot/native_screenshot.dart';
-import 'package:gallery_saver_plus/gallery_saver_plus.dart';
+
+import 'package:gallery_saver_plus/gallery_saver.dart';
+
 import 'gallery_service.dart';
 
 class RecordingBufferService {
@@ -28,7 +28,8 @@ class RecordingBufferService {
     final micStatus = await Permission.microphone.request();
     final extStatus = await Permission.storage.request();
 
-    if (micStatus.isGranted || micStatus.isLimited) {
+    if ((micStatus.isGranted || micStatus.isLimited) && (extStatus.isGranted || extStatus.isLimited)) {
+
       _isBuffering = true;
       _bufferingStreamController.add(true);
       
@@ -149,7 +150,8 @@ class RecordingBufferService {
     }
   }
 
-  static void stopBuffer() async {
+  static Future<void> stopBuffer() async {
+
     if (!_isBuffering) return;
     _chunkTimer?.cancel();
     try {

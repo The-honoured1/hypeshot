@@ -8,6 +8,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'services/editor_pipeline.dart';
 import 'services/gallery_service.dart';
 import 'providers/game_provider.dart';
+import 'services/recording_buffer_service.dart';
+
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
