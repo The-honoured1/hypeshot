@@ -28,23 +28,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 32),
-              _buildHeader(context),
-              const SizedBox(height: 32),
-              _buildControlPanel(isRecording),
-              const SizedBox(height: 40),
-              _buildGameLauncher(appsAsync),
-              const Spacer(),
-              _buildCaptureCentral(context, isRecording),
-              const Spacer(),
-              _buildRecentSection(context),
-              const SizedBox(height: 32),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 32),
+                _buildHeader(context),
+                const SizedBox(height: 32),
+                _buildControlPanel(isRecording),
+                const SizedBox(height: 40),
+                _buildGameLauncher(appsAsync),
+                const SizedBox(height: 60),
+                _buildCaptureCentral(context, isRecording),
+                const SizedBox(height: 60),
+                _buildRecentSection(context),
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
@@ -237,7 +239,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               HypeButton(
-                label: isRecording ? 'Finish Recording' : 'Capture Moment',
+                label: isRecording ? 'Finish Recording' : 'Capture Project',
                 icon: isRecording ? LucideIcons.check : LucideIcons.camera,
                 isPrimary: true,
                 onTap: () async {
@@ -268,7 +270,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'MOMENTS',
+          'RECENT PROJECTS',
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white38),
         ),
         const SizedBox(height: 20),

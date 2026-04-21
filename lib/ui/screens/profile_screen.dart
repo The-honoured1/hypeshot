@@ -13,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('MOMENTS', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700, fontSize: 13)),
+        title: const Text('PROJECTS', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700, fontSize: 13)),
         leading: IconButton(
           icon: const Icon(LucideIcons.chevronLeft, size: 20),
           onPressed: () => context.pop(),
@@ -64,7 +64,7 @@ class ProfileScreen extends StatelessWidget {
         ).animate().fadeIn().moveY(begin: 10, end: 0),
         const SizedBox(height: 4),
         const Text(
-          'Moment Collector',
+          'Project Collector',
           style: TextStyle(color: Colors.white38, fontWeight: FontWeight.w500, fontSize: 13, letterSpacing: 0.5),
         ).animate().fadeIn(delay: 200.ms),
       ],
@@ -75,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _statColumn('42', 'CLIPS'),
+        _statColumn('42', 'PROJECTS'),
         _statDivider(),
         _statColumn('1.2k', 'SHARES'),
         _statDivider(),
@@ -103,7 +103,7 @@ class ProfileScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text(
-          'COLLECTION',
+          'PROJECT COLLECTION',
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white38),
         ),
         Icon(LucideIcons.list, size: 14, color: Colors.white12),

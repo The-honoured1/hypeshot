@@ -10,6 +10,9 @@ class GameService {
       includeAppIcons: false,
     );
 
+    // Filter by game category
+    apps.retainWhere((app) => app.category == ApplicationCategory.game);
+
     // Sort alphabetically
     apps.sort((a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
     

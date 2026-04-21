@@ -60,7 +60,7 @@ class _EditorScreenState extends State<EditorScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('EDIT MOMENT', style: TextStyle(letterSpacing: 1, fontSize: 13, fontWeight: FontWeight.w700)),
+        title: const Text('EDIT PROJECT', style: TextStyle(letterSpacing: 1, fontSize: 13, fontWeight: FontWeight.w700)),
         leading: IconButton(icon: const Icon(LucideIcons.x, size: 20), onPressed: () => context.pop()),
         actions: [
           Padding(
@@ -201,7 +201,7 @@ class _EditorScreenState extends State<EditorScreen> {
             const CircularProgressIndicator(strokeWidth: 2, color: Colors.white24),
             const SizedBox(height: 32),
             const Text(
-              'Saving Clip...',
+              'Saving Project...',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -244,7 +244,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 ),
                 const SizedBox(height: 48),
                 HypeButton(
-                  label: 'Add to Moment',
+                  label: 'Add to Project',
                   onTap: () {
                     setState(() => _overlayText = current);
                     Navigator.pop(context);
