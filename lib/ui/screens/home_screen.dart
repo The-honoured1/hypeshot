@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:device_apps/device_apps.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme.dart';
 import '../../providers/game_provider.dart';
 import '../../services/game_service.dart';
-import '../widgets/glass_widgets.dart';
 import '../widgets/recording_widgets.dart';
+import '../widgets/mesh_background.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -27,242 +25,163 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 32),
-                _buildHeader(context),
-                const SizedBox(height: 32),
-                _buildControlPanel(isRecording),
-                const SizedBox(height: 40),
-                _buildGameLauncher(appsAsync),
-                const SizedBox(height: 40),
-                _buildCaptureCentral(context, isRecording),
-                const SizedBox(height: 60),
-              ],
-            ),
+      body: AnimatedBackground(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(isRecording),
+              const Spacer(),
+              _buildCaptureCentral(isRecording),
+              const Spacer(),
+              _buildGameLibrary(appsAsync),
+              _buildSettingsRow(),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
+  Widget _buildHeader(bool isRecording) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'HYPESHOT',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          StatusPill(isRecording: isRecording),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCaptureCentral(bool isRecording) {
+    return Center(
+      child: CaptureButton(
+        isRecording: isRecording,
+        onTap: () async {
+          if (isRecording) {
+            final chunks = await ref.read(recordingProvider.notifier).stop();
+            // In the new flow, we might want to navigate to editor immediately
+            // or just stay here. The user said "separate screen for video editing".
+          } else {
+            await ref.read(recordingProvider.notifier).start();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildGameLibrary(AsyncValue<List<Application>> appsAsync) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'hypeshot.',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: -0.5,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(LucideIcons.image, size: 20, color: AppTheme.textSecondary),
-                    onPressed: () => context.push('/gallery'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const HypeMeter(level: 0.85),
-            ],
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            'LIBRARY',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.5,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 90,
+          child: appsAsync.when(
+            data: (apps) => ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: apps.length,
+              itemBuilder: (context, index) {
+                final app = apps[index];
+                return _buildGameCard(app);
+              },
+            ),
+            loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            error: (_, __) => const SizedBox(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildControlPanel(bool isRecording) {
+  Widget _buildGameCard(Application app) {
+    return Container(
+      width: 72,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      child: GestureDetector(
+        onTap: () => _launchGame(app.packageName),
+        child: Column(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: AppTheme.surfaceCard(radius: BorderRadius.circular(16)),
+              padding: const EdgeInsets.all(8),
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final iconAsync = ref.watch(appIconProvider(app.packageName));
+                  return iconAsync.when(
+                    data: (icon) => icon != null 
+                        ? Image.memory(icon) 
+                        : const Icon(LucideIcons.gamepad2),
+                    loading: () => const SizedBox(),
+                    error: (_, __) => const Icon(LucideIcons.gamepad2),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              app.appName.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsRow() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isRecording) const RecordingWave() else Icon(LucideIcons.circle, size: 10, color: Colors.white.withOpacity(0.2)),
-              const SizedBox(width: 8),
-              Text(
-                isRecording ? 'recording' : 'standby',
-                style: TextStyle(
-                  color: isRecording ? Colors.white : Colors.white54,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
+          const Text(
+            'AUTO-CAPTURE',
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.textSecondary),
           ),
-          GestureDetector(
-            onTap: () => setState(() => _autoRecord = !_autoRecord),
-            child: Row(
-              children: [
-                Text('auto-capture', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: _autoRecord ? Colors.white : Colors.white38)),
-                const SizedBox(width: 6),
-                Icon(_autoRecord ? LucideIcons.checkCircle2 : LucideIcons.circle, size: 14, color: _autoRecord ? Colors.white : Colors.white38),
-              ],
-            ),
+          Switch(
+            value: _autoRecord,
+            onChanged: (v) => setState(() => _autoRecord = v),
+            activeColor: AppTheme.accentPrimary,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGameLauncher(AsyncValue<List<Application>> appsAsync) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            'library',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppTheme.textSecondary),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 70,
-          child: appsAsync.when(
-            data: (apps) => ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: apps.length,
-              itemBuilder: (context, index) {
-                final app = apps[index];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: GestureDetector(
-                    onTap: () => _launchGameWithRecord(app.packageName),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Consumer(
-                              builder: (context, ref, _) {
-                                final iconAsync = ref.watch(appIconProvider(app.packageName));
-                                return iconAsync.when(
-                                  data: (iconData) => iconData != null
-                                      ? Image.memory(iconData, fit: BoxFit.cover, opacity: const AlwaysStoppedAnimation(0.9))
-                                      : const Icon(LucideIcons.layoutGrid, size: 20, color: AppTheme.textSecondary),
-                                  loading: () => const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white24))),
-                                  error: (_, __) => const Icon(LucideIcons.layoutGrid, size: 20, color: AppTheme.textSecondary),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: 54,
-                          child: Text(
-                            app.appName.toLowerCase(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w400, color: AppTheme.textSecondary),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-            loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 1.5, color: AppTheme.textSecondary)),
-            error: (e, s) => const Text('could not load library', style: TextStyle(color: AppTheme.textSecondary)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _launchGameWithRecord(String packageName) async {
+  Future<void> _launchGame(String packageName) async {
     if (_autoRecord) {
       await ref.read(recordingProvider.notifier).start();
     }
     await GameService.launchGame(packageName);
   }
-
-  Widget _buildCaptureCentral(BuildContext context, bool isRecording) {
-    return Center(
-      child: Column(
-        children: [
-          const SizedBox(height: 48),
-          GestureDetector(
-            onTap: () async {
-              if (isRecording) {
-                final chunks = await ref.read(recordingProvider.notifier).stop();
-                if ((chunks['current'] != null || chunks['previous'] != null) && mounted) {
-                  context.push('/editor', extra: chunks);
-                }
-              } else {
-                await ref.read(recordingProvider.notifier).start();
-              }
-            },
-            child: AnimatedContainer(
-              duration: 300.ms,
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isRecording ? AppTheme.accent.withOpacity(0.05) : Colors.transparent,
-                border: Border.all(
-                  color: isRecording ? AppTheme.accent : Colors.white.withOpacity(0.1),
-                  width: 1,
-                ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isRecording ? LucideIcons.focus : LucideIcons.play,
-                      size: 32,
-                      color: isRecording ? AppTheme.textPrimary : AppTheme.textSecondary,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      isRecording ? 'capture shape' : 'initiate',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: isRecording ? AppTheme.textPrimary : AppTheme.textSecondary,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            isRecording ? 'tap to extract' : 'tap to buffer',
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: AppTheme.textSecondary, letterSpacing: 0.5),
-          ).animate(target: isRecording ? 1 : 0).fadeIn(delay: 200.ms),
-        ],
-      ),
-    );
-  }
-
 }

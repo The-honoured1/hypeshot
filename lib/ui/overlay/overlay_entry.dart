@@ -21,13 +21,10 @@ class _OverlayControlWidgetState extends State<OverlayControlWidget> {
   bool _isFlashing = false;
 
   void _onTap() async {
-    // Visual feedback for capture
     setState(() => _isFlashing = true);
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) setState(() => _isFlashing = false);
     });
-
-    // Send a message to the main app instance to trigger a capture
     FlutterOverlayWindow.shareData("CAPTURE_HIGHLIGHT");
   }
 
@@ -38,22 +35,25 @@ class _OverlayControlWidgetState extends State<OverlayControlWidget> {
       child: GestureDetector(
         onTap: _onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 50,
-          height: 50,
+          duration: const Duration(milliseconds: 150),
+          width: 54,
+          height: 54,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _isFlashing ? Colors.white : const Color(0xFF121216).withOpacity(0.9), // AppTheme.surface
-            border: Border.all(
-              color: _isFlashing ? Colors.transparent : Colors.white.withOpacity(0.1),
-              width: 1,
-            ),
+            color: _isFlashing ? Colors.white : const Color(0xFF8B5CF6).withOpacity(0.9), // accentPrimary
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF8B5CF6).withOpacity(_isFlashing ? 0.8 : 0.3),
+                blurRadius: _isFlashing ? 20 : 10,
+                spreadRadius: 2,
+              )
+            ],
           ),
           child: Center(
             child: Icon(
-              LucideIcons.focus,
-              size: 24,
-              color: _isFlashing ? Colors.black : Colors.white70,
+              LucideIcons.zap,
+              size: 26,
+              color: _isFlashing ? Colors.black : Colors.white,
             ),
           ),
         ),

@@ -5,16 +5,13 @@ import 'core/theme.dart';
 import 'core/navigation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'ui/widgets/mesh_background.dart';
-import 'ui/overlay/overlay_entry.dart';
 import 'services/editor_pipeline.dart';
 import 'services/gallery_service.dart';
 import 'providers/game_provider.dart';
-export 'ui/overlay/overlay_entry.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     const ProviderScope(
@@ -41,7 +38,7 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
         final notifier = ref.read(recordingProvider.notifier);
         final chunks = await notifier.stop();
         if (chunks['current'] != null || chunks['previous'] != null) {
-          importEditorPipeline(chunks);
+          _importHighlight(chunks);
         }
         await notifier.start();
       }
@@ -49,17 +46,16 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
   }
 
   Future<void> _initPermissionsAndNotifications() async {
-    // Request SYSTEM_ALERT_WINDOW immediately to ensure overlay can work
     await Permission.systemAlertWindow.request();
+    await Permission.notification.request();
 
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    const initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    );
         
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
+      onDidReceiveNotificationResponse: (response) {
         if (response.payload != null) {
           goRouter.push('/preview', extra: response.payload);
         }
@@ -67,40 +63,28 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
     );
   }
 
-  void importEditorPipeline(Map<String, String?> chunks) async {
-     final prev = chunks['previous'];
-     final curr = chunks['current'];
-     final mergedPath = await EditorPipeline.mergeChunks(prev, curr);
-     
+  void _importHighlight(Map<String, String?> chunks) async {
+     final mergedPath = await EditorPipeline.mergeChunks(chunks['previous'], chunks['current']);
      if (mergedPath != null) {
-       final finalPath = await EditorPipeline.processHighlight(
-         inputPath: mergedPath,
-         verticalCrop: true,
-       );
-       
+       final finalPath = await EditorPipeline.processHighlight(inputPath: mergedPath);
        if (finalPath != null) {
          final savedPath = await GalleryService.saveClipToGallery(finalPath);
-         _showSavedNotification(savedPath);
+         _showNotification(savedPath);
        }
      }
   }
 
-  Future<void> _showSavedNotification(String path) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'hypeshot_saves', 
-      'Saves',
-      channelDescription: 'Notifications for saved clips',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+  Future<void> _showNotification(String path) async {
     await flutterLocalNotificationsPlugin.show(
       0,
-      'Highlight Saved! 🎬',
-      'Tap to preview or edit your clip.',
-      platformChannelSpecifics,
+      'HIGHLIGHT SAVED',
+      'TAP TO PREVIEW',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'hypeshot_saves', 'SAVES',
+          importance: Importance.max, priority: Priority.high,
+        ),
+      ),
       payload: path,
     );
   }
@@ -112,12 +96,6 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       routerConfig: goRouter,
-      builder: (context, child) {
-        return Scaffold(
-          body: MeshBackground(child: child ?? const SizedBox()),
-        );
-      },
     );
   }
 }
-
