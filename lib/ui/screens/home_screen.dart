@@ -40,11 +40,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _buildControlPanel(isRecording),
                 const SizedBox(height: 40),
                 _buildGameLauncher(appsAsync),
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
                 _buildCaptureCentral(context, isRecording),
                 const SizedBox(height: 60),
-                _buildRecentSection(context),
-                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -74,25 +72,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 12),
               const HypeMeter(level: 0.85),
             ],
-          ),
-        ),
-        const SizedBox(width: 24),
-        GestureDetector(
-          onTap: () => context.push('/feed'),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.05)),
-            ),
-            child: const Row(
-              children: [
-                Icon(LucideIcons.playSquare, color: AppTheme.textPrimary, size: 14),
-                SizedBox(width: 6),
-                Text('Feed', style: TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w500)),
-              ],
-            ),
           ),
         ),
       ],
@@ -266,46 +245,4 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildRecentSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'RECENT PROJECTS',
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white38),
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 120,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 3,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Hero(
-                  tag: 'home_clip_$index',
-                  child: GlassCard(
-                    padding: EdgeInsets.zero,
-                    child: Container(
-                      width: 140,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        image: DecorationImage(
-                          image: NetworkImage('https://picsum.photos/seed/${index + 10}/400/300'),
-                          fit: BoxFit.cover,
-                          opacity: 0.3,
-                        ),
-                      ),
-                      child: const Center(child: Icon(LucideIcons.play, color: Colors.white54, size: 24)),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
-      ],
-    );
-  }
 }

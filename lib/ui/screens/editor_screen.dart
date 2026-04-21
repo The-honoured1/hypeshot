@@ -84,7 +84,8 @@ class _EditorScreenState extends State<EditorScreen> {
 
   Future<void> _exportVideo() async {
     setState(() => _isProcessing = true);
-    await Future.delayed(const Duration(seconds: 2));
+    // Actually save to gallery leveraging ShareService
+    await ShareService.saveToGallery(_controller.file.path);
     if (mounted) {
       setState(() => _isProcessing = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,8 +95,11 @@ class _EditorScreenState extends State<EditorScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      context.pop();
     }
+  }
+
+  Future<void> _shareVideo() async {
+    await ShareService.shareToPlatform(_controller.file.path);
   }
 
   @override
@@ -106,11 +110,21 @@ class _EditorScreenState extends State<EditorScreen> {
         title: const Text('EDIT PROJECT', style: TextStyle(letterSpacing: 1, fontSize: 13, fontWeight: FontWeight.w700)),
         leading: IconButton(icon: const Icon(LucideIcons.x, size: 20), onPressed: () => context.pop()),
         actions: [
+          TextButton(
+            onPressed: _isProcessing ? null : _shareVideo,
+            child: const Row(
+              children: [
+                Icon(LucideIcons.share2, color: AppTheme.textPrimary, size: 14),
+                SizedBox(width: 4),
+                Text('SHARE', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton(
               onPressed: _isProcessing ? null : _exportVideo,
-              child: const Text('SAVE', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+              child: const Text('SAVE', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 13)),
             ),
           ),
         ],

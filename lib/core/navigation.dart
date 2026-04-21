@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../ui/screens/home_screen.dart';
 import '../ui/screens/editor_screen.dart';
-import '../ui/screens/feed_screen.dart';
 
 final goRouter = GoRouter(
   initialLocation: '/',
@@ -10,10 +9,6 @@ final goRouter = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const HomeScreen(),
-    ),
-    GoRoute(
-      path: '/feed',
-      builder: (context, state) => const FeedScreen(),
     ),
     GoRoute(
       path: '/editor',
