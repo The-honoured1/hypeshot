@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:native_screenshot/native_screenshot.dart';
 import 'package:gallery_saver_plus/gallery_saver_plus.dart';
+import 'gallery_service.dart';
 
 class RecordingBufferService {
   static bool _isBuffering = false;
@@ -137,6 +138,9 @@ class RecordingBufferService {
     try {
       final path = await NativeScreenshot.takeScreenshot();
       if (path != null) {
+        // Save to internal app stash to fix "empty gallery"
+        await GalleryService.saveMediaToGallery(path, isImage: true);
+        // Also save to system gallery for redundancy
         await GallerySaver.saveImage(path, albumName: "HypeShot");
       }
       return path;
