@@ -31,55 +31,52 @@ class _HypeButtonState extends State<HypeButton> {
         widget.onTap();
       },
       onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          decoration: widget.isPrimary
-              ? BoxDecoration(
-                  gradient: AppTheme.brandGradient,
-                  borderRadius: BorderRadius.circular(14),
-                )
-              : AppTheme.surfaceCard(radius: BorderRadius.circular(14)),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.icon != null) ...[
-                Icon(
-                  widget.icon,
-                  color: widget.isPrimary
-                      ? Colors.white
-                      : AppTheme.textPrimary,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                widget.label,
-                style: TextStyle(
-                  color: widget.isPrimary
-                      ? Colors.white
-                      : AppTheme.textPrimary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: widget.isPrimary 
+              ? (_pressed ? AppTheme.textMain.withOpacity(0.8) : AppTheme.actionWhite)
+              : Colors.transparent,
+          border: Border.all(
+            color: widget.isPrimary ? Colors.transparent : AppTheme.borderThin,
+            width: 1,
           ),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (widget.icon != null) ...[
+              Icon(
+                widget.icon,
+                color: widget.isPrimary ? Colors.black : AppTheme.textMain,
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              widget.label.toUpperCase(),
+              style: TextStyle(
+                color: widget.isPrimary ? Colors.black : AppTheme.textMain,
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class GlassCard extends StatelessWidget {
+class StudioCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
   final BorderRadius? radius;
 
-  const GlassCard({
+  const StudioCard({
     super.key,
     required this.child,
     this.padding,
@@ -90,7 +87,7 @@ class GlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: AppTheme.surfaceCard(radius: radius),
+      decoration: AppTheme.studioCard(radius: radius),
       child: child,
     );
   }

@@ -40,23 +40,38 @@ class _GalleryScreenState extends State<GalleryScreen> {
       video: videoPath,
       thumbnailPath: tempDir.path,
       imageFormat: ImageFormat.JPEG,
-      maxHeight: 200,
-      quality: 50,
+      maxHeight: 150,
+      quality: 40,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bgDeep,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'GALLERY',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                  ),
+                  Text(
+                    '${_clips.length} CLIPS',
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppTheme.textDim, letterSpacing: 1),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
+                  ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.textDim))
                   : _clips.isEmpty
                       ? _buildEmptyState()
                       : _buildGrid(),
@@ -67,37 +82,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'GALLERY',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: AppTheme.accentGlass(radius: BorderRadius.circular(12)),
-            child: Text(
-              '${_clips.length} CLIPS',
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.accentPrimary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          Icon(LucideIcons.package, size: 48, color: AppTheme.textMuted),
+          Icon(LucideIcons.package, size: 40, color: AppTheme.borderThin),
           SizedBox(height: 16),
-          Text('NO CAPTURES', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textMuted)),
+          Text(
+            'STASH EMPTY',
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppTheme.textDim, letterSpacing: 1),
+          ),
         ],
       ),
     );
@@ -105,12 +100,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   Widget _buildGrid() {
     return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.8,
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 0.7,
       ),
       itemCount: _clips.length,
       itemBuilder: (context, index) {
@@ -120,40 +115,22 @@ class _GalleryScreenState extends State<GalleryScreen> {
             await context.push('/preview', extra: clip.path);
             _loadClips();
           },
+          onLongPress: () async {
+             // Quick delete action
+             await GalleryService.deleteClip(clip.path);
+             _loadClips();
+          },
           child: Container(
-            decoration: AppTheme.surfaceCard(radius: BorderRadius.circular(16)),
+            decoration: AppTheme.studioCard(),
             clipBehavior: Clip.antiAlias,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                FutureBuilder<String?>(
-                  future: _getThumbnail(clip.path),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data != null) {
-                      return Image.file(File(snapshot.data!), fit: BoxFit.cover);
-                    }
-                    return Container(color: AppTheme.bgElevated);
-                  },
-                ),
-                Positioned(
-                  bottom: 0, left: 0, right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
-                        begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: const [
-                        Icon(LucideIcons.play, size: 12, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            child: FutureBuilder<String?>(
+              future: _getThumbnail(clip.path),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  return Image.file(File(snapshot.data!), fit: BoxFit.cover);
+                }
+                return Container(color: AppTheme.bgElevated);
+              },
             ),
           ),
         );

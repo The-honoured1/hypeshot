@@ -54,7 +54,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
               ),
             )
           else
-            const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24)),
           
           _buildTopBar(),
           _buildActionBar(),
@@ -72,7 +72,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
+                icon: const Icon(LucideIcons.chevronLeft, color: Colors.white),
                 onPressed: () => context.pop(),
               ),
             ],
@@ -88,31 +88,43 @@ class _PreviewScreenState extends State<PreviewScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _previewAction(LucideIcons.trash2, AppTheme.accentSecondary, () async {
+          _actionBtn(LucideIcons.trash2, 'DISCARD', AppTheme.accentSignal, () async {
             await GalleryService.deleteClip(widget.videoPath);
             if (context.mounted) context.pop();
           }),
-          _previewAction(LucideIcons.edit3, AppTheme.accentPrimary, () {
+          _actionBtn(LucideIcons.edit3, 'EDIT', AppTheme.actionWhite, () {
             _controller.pause();
             context.push('/editor', extra: widget.videoPath);
           }),
-          _previewAction(LucideIcons.check, AppTheme.accentTertiary, () => context.pop()),
+          _actionBtn(LucideIcons.check, 'SAVE', AppTheme.accentAmber, () {
+             context.pop();
+          }),
         ],
       ),
     );
   }
 
-  Widget _previewAction(IconData icon, Color color, VoidCallback onTap) {
+  Widget _actionBtn(IconData icon, String label, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
-          shape: BoxShape.circle,
-          border: Border.all(color: color.withOpacity(0.5), width: 1),
-        ),
-        child: Icon(icon, color: color, size: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.bgSlate,
+              border: Border.all(color: color, width: 2),
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: color, letterSpacing: 1),
+          ),
+        ],
       ),
     );
   }

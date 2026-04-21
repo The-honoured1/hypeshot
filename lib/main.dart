@@ -33,13 +33,15 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
     super.initState();
     _initPermissionsAndNotifications();
     
+    // Step 3-5: Floating Button -> Quick Preview Flow
     FlutterOverlayWindow.overlayListener.listen((event) async {
       if (event == "CAPTURE_HIGHLIGHT") {
         final notifier = ref.read(recordingProvider.notifier);
         final chunks = await notifier.stop();
         if (chunks['current'] != null || chunks['previous'] != null) {
-          _importHighlight(chunks);
+          _handleCaptureSuccess(chunks);
         }
+        // Step 2: Auto-restart buffer to keep loop alive
         await notifier.start();
       }
     });
@@ -63,26 +65,36 @@ class _HypeShotAppState extends ConsumerState<HypeShotApp> {
     );
   }
 
-  void _importHighlight(Map<String, String?> chunks) async {
+  void _handleCaptureSuccess(Map<String, String?> chunks) async {
+     // Step 4: Rapid Save & Process
      final mergedPath = await EditorPipeline.mergeChunks(chunks['previous'], chunks['current']);
      if (mergedPath != null) {
        final finalPath = await EditorPipeline.processHighlight(inputPath: mergedPath);
        if (finalPath != null) {
          final savedPath = await GalleryService.saveClipToGallery(finalPath);
-         _showNotification(savedPath);
+         
+         // Step 5: Critical UX - Pop notification for fast preview
+         _showStudioNotification(savedPath);
+         
+         // Also jump app to preview if it's currently open
+         if (mounted) {
+           goRouter.push('/preview', extra: savedPath);
+         }
        }
      }
   }
 
-  Future<void> _showNotification(String path) async {
+  Future<void> _showStudioNotification(String path) async {
     await flutterLocalNotificationsPlugin.show(
       0,
-      'HIGHLIGHT SAVED',
-      'TAP TO PREVIEW',
+      'HIGHLIGHT STASHED',
+      'VIEW NOW',
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'hypeshot_saves', 'SAVES',
-          importance: Importance.max, priority: Priority.high,
+          importance: Importance.max, 
+          priority: Priority.high,
+          color: Color(0xFFFF3B30),
         ),
       ),
       payload: path,

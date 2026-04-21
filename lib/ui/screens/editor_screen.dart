@@ -31,7 +31,7 @@ class _EditorScreenState extends State<EditorScreen> {
     } else if (widget.videoPath != null) {
       _initEditor(widget.videoPath!);
     } else {
-      _errorMessage = "NO CLIP SELECTED";
+      _errorMessage = "EMPTY DATA";
     }
   }
 
@@ -47,26 +47,26 @@ class _EditorScreenState extends State<EditorScreen> {
     } else {
       setState(() {
         _isProcessing = false;
-        _errorMessage = "FAILED TO MERGE CHUNKS";
+        _errorMessage = "MERGE FAILED";
       });
     }
   }
 
   void _initEditor(String path) {
-    final file = File(path);
-    if (!file.existsSync()) {
-      setState(() => _errorMessage = "FILE NOT FOUND");
-      return;
-    }
-
     _controller = VideoEditorController.file(
-      file,
+      File(path),
       minDuration: const Duration(seconds: 1),
-      maxDuration: const Duration(seconds: 30),
+      maxDuration: const Duration(seconds: 60),
     )..initialize().then((_) {
-      if (mounted) setState(() => _initialized = true);
+      if (mounted) setState(() {
+        _initialized = true;
+        _isProcessing = false;
+      });
     }).catchError((e) {
-      if (mounted) setState(() => _errorMessage = "LOAD ERROR");
+      if (mounted) setState(() {
+        _isProcessing = false;
+        _errorMessage = "FILE ERROR";
+      });
     });
   }
 
@@ -87,11 +87,11 @@ class _EditorScreenState extends State<EditorScreen> {
                   children: [
                     Center(child: CropGridViewer.preview(controller: _controller)),
                     _buildHeader(),
-                    _buildDock(),
+                    _buildMinimalDock(),
                     if (_isProcessing) _buildProcessingOverlay(),
                   ],
                 )
-              : const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              : const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.textDim)),
     );
   }
 
@@ -100,9 +100,9 @@ class _EditorScreenState extends State<EditorScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(LucideIcons.alertTriangle, size: 48, color: AppTheme.accentSecondary),
+          const Icon(LucideIcons.alertCircle, size: 40, color: AppTheme.accentSignal),
           const SizedBox(height: 16),
-          Text(_errorMessage, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(_errorMessage, style: const TextStyle(fontWeight: FontWeight.w900, color: AppTheme.textDim)),
         ],
       ),
     );
@@ -121,19 +121,10 @@ class _EditorScreenState extends State<EditorScreen> {
                 icon: const Icon(LucideIcons.chevronLeft),
                 onPressed: () => context.pop(),
               ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(LucideIcons.share2),
-                    onPressed: () => ShareService.shareToPlatform(_controller.file.path),
-                  ),
-                  const SizedBox(width: 8),
-                  HypeButton(
-                    label: 'SAVE',
-                    onTap: _exportVideo,
-                    isPrimary: true,
-                  ),
-                ],
+              HypeButton(
+                label: 'EXPORT',
+                onTap: _exportVideo,
+                isPrimary: true,
               ),
             ],
           ),
@@ -142,41 +133,38 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
-  Widget _buildDock() {
+  Widget _buildMinimalDock() {
     return Positioned(
       bottom: 24, left: 24, right: 24,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            height: 40,
-            child: TrimSlider(controller: _controller),
+            height: 48,
+            child: TrimSlider(
+              controller: _controller,
+            ),
           ),
           const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-            decoration: AppTheme.accentGlass(radius: BorderRadius.circular(32)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _toolIcon(LucideIcons.scissors, 'TRIM'),
-                _toolIcon(LucideIcons.type, 'TEXT'),
-                _toolIcon(LucideIcons.volume2, 'AUDIO'),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _tool(LucideIcons.scissors, 'TRIM'),
+              _tool(LucideIcons.type, 'CAPTION'),
+              _tool(LucideIcons.zoomIn, 'ZOOM'),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _toolIcon(IconData icon, String label) {
+  Widget _tool(IconData icon, String label) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: AppTheme.textPrimary),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w700)),
+        Icon(icon, size: 20, color: AppTheme.textMain),
+        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)),
       ],
     );
   }
@@ -185,7 +173,7 @@ class _EditorScreenState extends State<EditorScreen> {
     return Container(
       color: Colors.black87,
       child: const Center(
-        child: CircularProgressIndicator(color: AppTheme.accentPrimary),
+        child: CircularProgressIndicator(color: AppTheme.accentAmber),
       ),
     );
   }

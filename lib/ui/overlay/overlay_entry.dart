@@ -22,7 +22,7 @@ class _OverlayControlWidgetState extends State<OverlayControlWidget> {
 
   void _onTap() async {
     setState(() => _isFlashing = true);
-    Future.delayed(const Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) setState(() => _isFlashing = false);
     });
     FlutterOverlayWindow.shareData("CAPTURE_HIGHLIGHT");
@@ -34,26 +34,22 @@ class _OverlayControlWidgetState extends State<OverlayControlWidget> {
       color: Colors.transparent,
       child: GestureDetector(
         onTap: _onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 54,
-          height: 54,
+        child: Container(
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _isFlashing ? Colors.white : const Color(0xFF8B5CF6).withOpacity(0.9), // accentPrimary
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF8B5CF6).withOpacity(_isFlashing ? 0.8 : 0.3),
-                blurRadius: _isFlashing ? 20 : 10,
-                spreadRadius: 2,
-              )
-            ],
+            color: _isFlashing ? Colors.white : const Color(0xFF141416),
+            border: Border.all(
+              color: _isFlashing ? Colors.white : const Color(0xFFFF3B30),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(25),
           ),
           child: Center(
             child: Icon(
               LucideIcons.zap,
-              size: 26,
-              color: _isFlashing ? Colors.black : Colors.white,
+              size: 24,
+              color: _isFlashing ? Colors.black : const Color(0xFFFF3B30),
             ),
           ),
         ),
