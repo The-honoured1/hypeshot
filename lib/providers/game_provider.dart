@@ -7,8 +7,9 @@ final appListProvider = FutureProvider<List<Application>>((ref) async {
   return await GameService.getInstalledGames();
 });
 
-class RecordingState extends StateNotifier<bool> {
-  RecordingState() : super(false);
+class RecordingState extends Notifier<bool> {
+  @override
+  bool build() => false;
 
   Future<void> start() async {
     final success = await RecordingService.startRecording();
@@ -22,6 +23,4 @@ class RecordingState extends StateNotifier<bool> {
   }
 }
 
-final recordingProvider = StateNotifierProvider<RecordingState, bool>((ref) {
-  return RecordingState();
-});
+final recordingProvider = NotifierProvider<RecordingState, bool>(RecordingState.new);

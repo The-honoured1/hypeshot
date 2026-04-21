@@ -28,9 +28,12 @@ subprojects {
         val android = extensions.findByName("android")
         if (android is com.android.build.gradle.BaseExtension) {
             if (android.namespace == null) {
-                val groupPath = group?.toString() ?: ""
+                val groupPath = group.toString()
                 android.namespace = if (groupPath.isNotEmpty()) groupPath else "com.plugin.${name.replace("-", ".")}"
             }
+            // Fix for lStar error
+            android.compileSdkVersion(34)
+            android.defaultConfig.targetSdkVersion(34)
         }
     }
     if (state.executed) {
