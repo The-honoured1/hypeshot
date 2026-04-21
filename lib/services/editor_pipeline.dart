@@ -50,8 +50,8 @@ class EditorPipeline {
     }
 
     String filterStr = filters.isNotEmpty ? '-vf "${filters.join(',')}"' : '';
-    // Optional: Auto-trim last 15 seconds: -sseof -15
-    final session = await FFmpegKit.execute('-sseof -15 -i $inputPath $filterStr -y $outPath');
+    // Auto-trim last 30 seconds: -sseof -30
+    final session = await FFmpegKit.execute('-sseof -30 -i $inputPath $filterStr -y $outPath');
     final returnCode = await session.getReturnCode();
 
     if (ReturnCode.isSuccess(returnCode)) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -27,6 +28,19 @@ class RecordingBufferService {
     if (micStatus.isGranted || micStatus.isLimited) {
       _isBuffering = true;
       _bufferingStreamController.add(true);
+      
+      await FlutterOverlayWindow.showOverlay(
+        enableDrag: true,
+        overlayTitle: "HypeShot",
+        overlayContent: "Tap to Capture",
+        flag: OverlayFlag.defaultFlag,
+        alignment: OverlayAlignment.centerRight,
+        visibility: NotificationVisibility.visibilityPublic,
+        positionGravity: PositionGravity.auto,
+        width: 150,
+        height: 150,
+      );
+
       await _startNewChunk();
       
       // Start the cyclic timer
@@ -102,6 +116,11 @@ class RecordingBufferService {
     try {
       await FlutterScreenRecording.stopRecordScreen;
     } catch (_) {}
+    
+    try {
+      await FlutterOverlayWindow.closeOverlay();
+    } catch (_) {}
+
     _isBuffering = false;
     _bufferingStreamController.add(false);
   }
