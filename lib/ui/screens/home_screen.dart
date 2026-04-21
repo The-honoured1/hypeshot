@@ -244,9 +244,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 isPrimary: true,
                 onTap: () async {
                   if (isRecording) {
-                    final path = await ref.read(recordingProvider.notifier).stop();
-                    if (path != null && mounted) {
-                      context.push('/editor', extra: path);
+                    final chunks = await ref.read(recordingProvider.notifier).stop();
+                    if ((chunks['current'] != null || chunks['previous'] != null) && mounted) {
+                      context.push('/editor', extra: chunks);
                     }
                   } else {
                     context.push('/editor');
